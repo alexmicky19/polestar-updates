@@ -16,6 +16,7 @@
     --line:#e5e5e1; --line-strong:#d8d8d3;
     --gold:#b08d4f; --gold-soft:#f0e7d6;
     --ok:#3c7d57; --ok-soft:#e2efe7;
+    --warn:#b4622a; --warn-soft:#f3e2d5;
     --radius:14px;
     --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   }
@@ -56,6 +57,8 @@
   .banner .sub{color:var(--muted);font-size:14px;margin-top:10px;max-width:52ch}
   .badge{display:inline-flex;align-items:center;gap:10px;border-radius:100px;padding:14px 24px;font-size:16px;font-weight:600;letter-spacing:.02em;white-space:nowrap;background:var(--ok-soft);color:var(--ok)}
   .badge .dot{width:10px;height:10px;border-radius:50%;background:var(--ok)}
+  .badge.warn{background:var(--warn-soft);color:var(--warn)}
+  .badge.warn .dot{background:var(--warn)}
 
   .note-box{background:var(--gold-soft);border:1px solid #e7d9bd;border-radius:var(--radius);padding:16px 18px;margin-bottom:36px;font-size:13.5px;color:#6a5427}
   .note-box b{color:#5a4620}
@@ -96,6 +99,8 @@
   .ver{font-size:17px;font-weight:600;letter-spacing:-.01em}
   .ver .p{color:var(--muted);font-weight:400}
   .ver .seen{display:block;font-size:11.5px;font-weight:400;color:var(--muted);letter-spacing:0;margin-top:3px}
+  .ver .seen .build{color:var(--gold);font-variant-numeric:tabular-nums}
+  .ver .seen .gap{color:var(--muted)}
   .tags{display:flex;gap:8px;align-items:center}
   .pill{display:inline-block;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
   .pill.latest{background:var(--gold-soft);color:var(--gold)}
@@ -111,6 +116,18 @@
   .body li.sub::before{display:none}
 
   footer{margin-top:56px;padding-top:26px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);line-height:1.7}
+  /* in the pipeline (registered-but-unreleased builds) */
+  .upcoming{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin:0 0 28px;overflow:hidden}
+  .upcoming summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;align-items:center;gap:12px}
+  .upcoming summary::-webkit-details-marker{display:none}
+  .upcoming summary h3{font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--ink)}
+  .upcoming summary .chev{margin-left:auto}
+  .upcoming .hint{padding:0 18px 14px;font-size:13px;color:var(--muted);max-width:64ch}
+  .up-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 18px;border-top:1px solid var(--line);font-size:14.5px}
+  .up-row .name{font-weight:600}
+  .up-row .name.unnamed{font-weight:400;color:var(--muted)}
+  .up-row .build{color:var(--gold);font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .up-row .build small{color:var(--muted)}
   footer a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line-strong)}
   .empty{color:var(--muted);font-size:14px;padding:20px 2px}
 
@@ -130,16 +147,18 @@
 
   <div class="banner">
     <div>
-      <div class="label">Latest released version</div>
+      <div class="label" id="bannerLabel">Latest released version</div>
       <div class="date" id="latestVer">—</div>
-      <div class="sub">This is the newest version documented in Polestar's manual for the selected model. It is delivered Over-the-Air (OTA) or at a workshop, and rolls out gradually by market and model year.</div>
+      <div class="sub" id="bannerSub">This is the newest version documented in Polestar's manual for the selected model. It is delivered Over-the-Air (OTA) or at a workshop, and rolls out gradually by market and model year.</div>
     </div>
-    <div class="badge"><span class="dot"></span><span id="latestBadge">Current</span></div>
+    <div class="badge" id="latestBadgeWrap"><span class="dot"></span><span id="latestBadge">Current</span></div>
   </div>
 
   <div class="note-box">
-    <b>About dates:</b> Polestar does <b>not</b> publish an explicit release date for software. For Polestar&nbsp;3 (sourced from Polestar's release-notes API), each version carries a build-week code, so dates shown as <b>"Released ~"</b> are the start of that week and are approximate. Polestar&nbsp;2 has no such code in its source, so its entries show <b>"First tracked"</b> — the date this tracker first observed the version. Either way, exact rollout still varies by market and model year.
+    <b>About dates:</b> Polestar does <b>not</b> publish an explicit release date for software. For Polestar&nbsp;3 (sourced from Polestar's release-notes API), each version carries a <b>build-week code</b> (shown on each entry as <b>build&nbsp;YYWWW</b>), so dates shown as <b>"Released ~"</b> are the start of that week and are approximate. Polestar&nbsp;2 has no such code in its source, so its entries show <b>"First tracked"</b> — the date this tracker first observed the version. The <b>predicted next update</b> for Polestar&nbsp;3 is a statistical estimate from the median gap between past releases, not an announcement. Either way, exact rollout still varies by market and model year.
   </div>
+
+  <details class="upcoming" id="upcoming" style="display:none"></details>
 
   <div class="stats">
     <div class="stat"><div class="k">Tracked versions</div><div class="v" id="statCount">—</div></div>
@@ -176,6 +195,7 @@
 <script>
 const DATA = {"polestar-2": [{"version": "P5.1.17", "notes": ["This software update provides minor refinements and general software improvements to Polestar 2, including improvements to the USB connection for Android Auto and Apple CarPlay."], "first_seen": "2026-07-15"}, {"version": "P5.1.9", "notes": ["This software update is solely a compatibility update for the new model year 2027 of Polestar 2"], "first_seen": "2026-07-15"}, {"version": "P5.0.10", "notes": ["This software update provides general stability improvements to Polestar 2, including:", "### Improvements valid for model year 2025 or older", "The operating system, Android Automotive OS, is upgraded to Android 13. This includes overall infotainment improvements and performance", "### Improvements valid for model year 2026 or newer", "Plug & Charge is introduced. This functionality automatically authenticates, authorizes, and starts charging at Plug & Charge supported stations without the need for manual payment, using secure communication between the car and charger. Simply find charging stations that support Plug & Charge through Google Maps in the centre display or in the Polestar Charge app.", "Activation instructions of Plug & Charge are available in the Polestar App and in the car’s centre display in the Charging menu", "Improvements to Bluetooth connection and automatic reconnection functionality, including phone book synchronization", "Improvements to Apple CarPlay®, including improved wired connection when connecting an iPhone", "Note: Bluetooth device connections may require re-pairing after successful installation of this software version. Please refer to the owner’s manual or contact Polestar Support if support is needed during this process", "### Bug fixes for model year 2026 or newer", "Bug fix for when sound from the audio system was distorted", "Bug fix for when the maps were not displayed in the DIM or CSD", "### Bug fixes for all Polestar 2 vehicles", "Bug fixes for the rear-view camera", "Bug fix for Range Assistant, including historical data now showing correct consumption figures in 20 km and 40 km views", "When French is selected as system language, the Range Assistant also includes a bug fix for when the app closes automatically", "Note: All historical consumption data will be cleared once this software has been installed"], "first_seen": "2026-07-15"}, {"version": "P4.2.13", "notes": ["This software update provides general stability improvements to all Polestar 2 vehicles, including:", "Bug fix for when DC-charging sometimes delivered limited max effect", "Bug fix for when the rear luggage compartment interior light intermittently did not turn on"], "first_seen": "2026-07-15"}, {"version": "P3.7.0", "notes": ["Compatibility update", "Note: The software content in this update is identical to P3.6.4"], "first_seen": "2026-07-15"}, {"version": "P3.6.4", "notes": ["Stability improvements to the parking assist camera", "Minor stability improvements"], "first_seen": "2026-07-15"}, {"version": "P3.5.24", "notes": ["Road Sign Information speed limit detection improvements, including greater accuracy at for example highway exit speed limits.", "Improvements to Lane Keeping Aid.", "iTPMS (Indirect Tyre Pressure Monitoring System) stability improvement.", "Change in logic of parking assist camera to always show reverse camera view when vehicle is placed in reverse. Cars with Split screen view with 360-camera and rear-view camera will show the split screen when the vehicle is placed in reverse.", "General stability improvements"], "first_seen": "2026-07-15"}, {"version": "P3.5.14", "notes": ["Road Sign Information speed limit detection improvements, including greater accuracy at for example highway exit speed limits.", "Improvements to Lane Keeping Aid.", "iTPMS (Indirect Tyre Pressure Monitoring System) stability improvement."], "first_seen": "2026-07-15"}, {"version": "P3.4.4", "notes": ["Parking view with split screen introduced, applicable only on cars built from 23w46 onwards.", "ETA - Estimated Time of Arrival in drivers display reinstated.", "Digital key pairing improvements.", "Remote Polestar app functions now available up to 22 days after last use of the vehicle.", "General stability improvements."], "first_seen": "2026-07-15"}, {"version": "P3.3.16", "notes": ["Enabling Android Auto.", "Improved driving experience at low speed (MY21-23).", "Note: After software installation you may need to store new reference values for the tire pressure monitoring system. Follow the instructions in the owner's manual."], "first_seen": "2026-07-15"}, {"version": "P3.2.8", "notes": ["Note: The release of this software is only to accommodate a hardware change in production. The SW content in this update is identical to P3.2.4:", "Compatibility update"], "first_seen": "2026-07-15"}, {"version": "P3.2.4", "notes": ["Stability improvements for Digital Key.", "Improved behaviour for Cruise Control and Adaptive Cruise Control."], "first_seen": "2026-07-15"}, {"version": "P3.1.10", "notes": ["Stability improvements for vehicle key recognition (only for late MY24 and MY25 vehicles)."], "first_seen": "2026-07-15"}, {"version": "P3.1.9", "notes": ["Performance improvements in the infotainment system.", "Stability improvements for the cabin climate settings.", "Maps in the driver display will not be visible during an active reverse event."], "first_seen": "2026-07-15"}, {"version": "P3.1.2", "notes": ["Climate preconditioning now with 10 minutes added to timer to account for users arriving late to the car after planning a departure time.", "General calibration for the climate system.", "Intelligent Speed Assistant icon update (only for European vehicles built from November 2023 onwards)."], "first_seen": "2026-07-15"}, {"version": "P3.0.3", "notes": ["Note:", "Software update should not be installed whilst the vehicle is charging, as this will interrupt the charging.", "Please schedule your software update for when charging is complete", "Android Automotive OS 12.", "Enabler for continued Google Automotive Services and 3rd party app development.", "New Messages application, where user can interact with some of the latest received messages directly on the screen, as a complement to the Voice assistant messenger functionality.", "Microphone icon indicating when the microphone is being used in the top bar.", "Steering wheel heater activated automatically with remote climate start below 10°C/50°F ambient temperature (for vehicles built before November 2022).", "Range App improvements: “Medium consumption” added to existing consumption meters.", "If user has not approved Google's Terms of Service, related Google apps will be greyed out. Tapping on greyed out icons will guide user to Google's Terms of Service.", "Off-line support for road sign information for users that have not approved Google’s Terms and conditions.", "“Complete Profile Setup” button now integrated in the center display.", "Improvements to traffic sign recognition for European markets.", "Improvements in Bluetooth connection between car and Apple CarPlay when transferring phone calls."], "first_seen": "2026-07-15"}], "polestar-3": [{"version": "P3.0.33", "notes": ["This software update provides general improvements and bug fixes."], "cms_version": 26380, "released": "2026-09-14", "first_seen": "2026-08-31"}, {"version": "P3.0.28", "notes": ["This software update is available for all Polestar 3 vehicles that have been upgraded with the new core computer.", "The operating system, Android Automotive OS, is upgraded to Android 15. The upgrade includes overall infotainment improvements and performance, as well as increased availability to more apps through Google Play Store. Audio from video apps can now be played while driving and controlled directly via the media widget.", "Additional functionality for the steering wheel buttons is introduced. The new functionality includes:", "Right-hand side touch controls:", "Media Controls", "Voice control activation", "Left-hand side touch controls:", "Adaptive cruise control settings", "Driver display mode switch", "Switch between Pilot Assist and Adaptive Cruise Control", "The feature associated with each touch zone appears in the driver display.", "Launch Mode is introduced for Polestar 3 Performance, model year 2026 or newer. Launch mode enables faster take-off from a standstill.", "To activate Launch Mode, while in Drive and at a standstill, press and hold the brake pedal, then press and hold the accelerator pedal. During activation, the speedometer will turn orange, an animation will appear in the driver display and confirm once Launch Mode is activated.", "Android Auto is introduced. The function wirelessly mirrors your Android phone’s interface, navigation, media and messaging apps onto the Polestar 3 centre display.", "As part of the Driver Monitoring System, the Driver Distraction Alert function is updated with enhanced visual and audible notifications.", "Support for Horn & Lights in the Polestar app. Polestar 3 now supports remotely flashing the lights or triggering horn & lights from the Polestar app to help locate the vehicle in busy areas. Availability may vary by region.", "Air purification support in the Polestar app. This functionality allows you to remotely start an air purification cycle from the Polestar app. Available on Polestar 3 equipped with the optional Advance Air Cleaner (Plus pack).", "The media player now includes a button with direct access to sound settings.", "Car status view can now display the current tyre pressure for each individual wheel position in the centre display. This function is only available for model year 2026 or newer.", "### Additional improvements", "Improvements to Exit Assist, now including a temporary prevention of opening the door – in addition to an audible and visual warning – if pedestrians, bicycles, or other vehicles approaching from the rear are detected. A double pull of the door latch will override the temporary hold.", "Previously, Exit Assist only provided an audible and visual warning when detecting objects approaching from the rear.", "Improvements to Connected Safety, with the function now extended to provide warnings for large animals and roadworks ahead.", "Improvements to Apple CarPlay, now supporting Dolby Atmos, delivering a more immersive and directional sound experience when supported content is played.", "Improvements to the foot-operated tailgate, including overall robustness and a longer activation time with extended audible feedback when closing the tailgate.", "Improvements to rear wiper behaviour, including a shorter wiper cleaning interval reduced from 10 to 8 seconds, and automatic activation of the rear wiper when reversing if the front wipers are already active.", "Improvements to the locking and unlocking functionality connected to approach recognition via ultra-wideband (UWB) connection.", "### Bug fixes", "Bug fix for when the phone wallet was displayed on the phone while it was placed on the wireless phone charger.", "Bug fix for when the rear defroster did not deactivate as expected during automatic start conditions.", "Bug fix for when the interior illumination brightness and theme did not respond correctly.", "Bug fix for when the alarm could be triggered when the car was unlocked and opened via the passenger door."], "cms_version": 26340, "released": "2026-08-17", "first_seen": "2026-08-31"}, {"version": "P3.0.26", "notes": ["This software update is available for all Polestar 3 vehicles that have been upgraded with the new core computer.", "The operating system, Android Automotive OS, is upgraded to Android 15. The upgrade includes overall infotainment improvements and performance, as well as increased availability to more apps through Google Play Store. Audio from video apps can now be played while driving and controlled directly via the media widget.", "Additional functionality for the steering wheel buttons is introduced. The new functionality includes:", "Right-hand side touch controls:", "Media Controls", "Voice control activation", "Left-hand side touch controls:", "Adaptive cruise control settings", "Driver display mode switch", "Switch between Pilot Assist and Adaptive Cruise Control", "The feature associated with each touch zone appears in the driver display.", "Launch Mode is introduced for Polestar 3 Performance, model year 2026 or newer. Launch mode enables faster take-off from a standstill.", "To activate Launch Mode, while in Drive and at a standstill, press and hold the brake pedal, then press and hold the accelerator pedal. During activation, the speedometer will turn orange, an animation will appear in the driver display and confirm once Launch Mode is activated.", "Android Auto is introduced. The function wirelessly mirrors your Android phone’s interface, navigation, media and messaging apps onto the Polestar 3 centre display.", "As part of the Driver Monitoring System, the Driver Distraction Alert function is updated with enhanced visual and audible notifications.", "The media player now includes a button with direct access to sound settings.", "Car status view can now display the current tyre pressure for each individual wheel position in the centre display. This function is only available for model year 2026 or newer.", "### Additional improvements", "Improvements to Exit Assist, now including a temporary prevention of opening the door – in addition to an audible and visual warning – if pedestrians, bicycles, or other vehicles approaching from the rear are detected. A double pull of the door latch will override the temporary hold.", "Previously, Exit Assist only provided an audible and visual warning when detecting objects approaching from the rear.", "Improvements to Connected Safety, with the function now extended to provide warnings for large animals and roadworks ahead", "Improvements to Apple CarPlay, now supporting Dolby Atmos, delivering a more immersive and directional sound experience when supported content is played.", "Improvements to the foot-operated tailgate, including overall robustness and a longer activation time with extended audible feedback when closing the tailgate.", "Improvements to rear wiper behaviour, including a shorter wiper cleaning interval reduced from 10 to 8 seconds, and automatic activation of the rear wiper when reversing if the front wipers are already active.", "Improvements to the locking and unlocking functionality connected to approach recognition via ultra-wideband (UWB) connection.", "### Bug fixes", "Bug fix for when the phone wallet was displayed on the phone while it was placed on the wireless phone charger.", "Bug fix for when the rear defroster did not deactivate as expected during automatic start conditions.", "Bug fix for when the interior illumination brightness and theme did not respond correctly.", "Bug fix for when the alarm could be triggered when the car was unlocked and opened via the passenger door."], "cms_version": 26170, "released": "2026-04-20", "first_seen": "2026-08-31"}, {"version": "P2.1.26", "notes": ["This software update provides general improvements and compatibility updates. It includes the software content released in all previous updates."], "cms_version": 26150, "released": "2026-04-06", "first_seen": "2026-08-31"}, {"version": "P2.1.25", "notes": ["This software update provides general improvements and compatibility updates. It includes the software content released in all previous updates."], "cms_version": 26110, "released": "2026-03-09", "first_seen": "2026-08-31"}, {"version": "P2.1.24", "notes": ["This software update provides general improvements and compatibility updates. It includes the software content released in 2.1.22."], "cms_version": 26090, "released": "2026-02-23", "first_seen": "2026-08-31"}, {"version": "P2.1.22", "notes": ["This software update provides general stability improvements to all Polestar 3 vehicles upgraded with the new core computer.", "HomeLink is introduced. The HomeLink app allows the user to pair and control gate openers, such as garage doors, produced by HomeLink", "As part of Pilot assist and Adaptive Cruise control, Adapt to speed limit is introduced. The Adapt to speed limit is a new function that allows the driver to accept or reject offers to adapt the set speed limit according to the updated roads’ speed limits", "The driver can enable Adapt to speed limit in the driver settings menu", "This functionality requires the vehicle to have Road Sign Information activated", "Connected safety introduced, allowing information sharing between vehicles via a cloud service. The function is intended to make a driver aware there may be a potential traffic situation ahead. Connected Safety can inform the driver when the following hazards are detected beyond the visible horizon:", "This is not the same functionality as provided via Google maps.", "Accident ahead", "Slippery road conditions", "Vehicles with hazard lights activated", "Time gap setting when using Adaptive cruise control or Pilot assist is introduced. The driver can select between three distance levels to vehicles ahead, in the centre display, improving comfort when using Adaptive cruise control or Pilot Assist.", "Automatic folding and unfolding of exterior mirrors when locking and unlocking the car is introduced", "Previously, it was only possible to manually fold and unfold the mirrors in settings", "Park Assist pilot is introduced in cars equipped with Pilot pack", "Park Assist pilot supports the driver with automatic parking in parallel parking spots. When driving at low speed, the function detects suitable parking spaces and available slots will be shown in camera view on the centre display. The driver can choose the parking spot and activate the automatic parking in the display. The vehicle will then steer and brake under driver supervision", "When using the Park Assist pilot to leave a parallel parking spot, the driver can select to exit the parking space either to the left or to right", "In-car communication using voice amplification and built-in microphones is introduced. This feature means front occupants don’t need to raise their voices to be heard by rear seat occupants while driving", "The driver and front seat passenger can speak naturally as their conversation is amplified through the car’s speakers, which adjusts the output volume at high speeds or with music playing", "The function is available in three settings (low, medium and high) which adapt the overall volume for all needs, including for hearing impairments", "In cars equipped with Bowers & Wilkins for Polestar, additional rear microphones enable easy communication between front and rear seats improving this feature further", "Bi-directional charging, V2H, for customers in California is introduced", "This charging solution uses direct current (DC) and enables V2H (Vehicle to home) functionality for Polestar 3 on the 400V electrical architecture", "The feature requires a bi-directional compatible DC-wall box available for Polestar 3 provided by Dcbel", "### Additional improvements", "Improvements to high-voltage battery consumption when vehicle not in use, including prevention of battery consumption while keeping the car core system active over time while parked", "Improvements to the centre display, including the possibility for users to re-order downloaded apps in the app centre. To do this, press and hold an app icon, and then drag it to the place you desire", "Improvements to the driver adjustment profile memory, including the exterior mirrors and driver seat to adjust according to saved preferences when switching between profiles", "Improvements to the headlamp low beam functionality, including a map data-based prediction of upcoming tunnels. This allows the low beam functionality to activate prior to entering a tunnel during daytime", "The function is active when the light setting is in Auto", "Improvements to the headlamp Adaptive High Beam functionality, including the function to now also be active on larger roads, such as motorways", "By providing additional lighting, using the most outer headlamp, this improves visibility towards road edges and results in added safety and more comfortable driving. In addition, the functionality has improved behaviour with smoother transitions around objects", "Previously, the system switched to low beam in situations where roads such as motorways were detected", "Improvements to the driver monitoring camera, including the following updates", "During use of Pilot assist and Adaptive Cruise Control, including assurance from the camera to confirm that the driver is paying attention before allowing the vehicle to follow traffic from standstill. The time allowed where the car is in standstill before proceeding to follow traffic has been increased", "If the driver is deemed to be unresponsive, the function is also updated to give distraction warnings even when the Driver Alert setting is turned off", "Improvement to Emergency Stop Assist, including a check-up call to Polestar Connect to ensure the driver safety. If the driver intervenes and interrupts the Emergency Stop Assist before the vehicle has been brought to complete standstill, the call will be disconnected", "Availability varies between regions. Contact Polestar support for more information.", "Improvements to Collision Avoidance Side, including function adaptation based on driver awareness to increase robustness for cut in/out scenarios. Driver awareness is taken into consideration when to engage in emergency steering functions", "This also includes function adaptation to intervene in situations where the driver is deemed inattentive and while cutting a curve, even though Lane Keeping Aid steering is turned off by the driver", "Improvements to the Occupant detection reminder, including adding functionality where the exterior position lights will be activated to provide a visual warning in addition to the audible warning", "Improvements to the rear luggage compartment lighting, including the light to now activate across all unlocking methods, ensuring consistent visibility regardless of access point", "### Bug fixes", "Bug fix for when the tailgate wasn’t opening fully due to the car detecting motion of users exiting the vehicle", "Bug fix for when the interior lighting theme, white or gold, intermittently didn’t allow switching between the colours", "Bug fix for when Google Maps would start in dark mode during daytime"], "cms_version": 26060, "released": "2026-02-02", "first_seen": "2026-08-31"}, {"version": "P1.4.15", "notes": ["In line with our commitment to continuous improvement, this extra release includes refinements aimed at further improving the AC charging experience. While users may not notice any changes, these updates are part of our proactive approach to delivering key improvements as soon as they are available."], "cms_version": 25440, "released": "2025-10-27", "first_seen": "2026-08-31"}, {"version": "P1.4.12", "notes": ["Fix for seat position so that it is now correctly connected to the selected driver profile.", "Solution for performance issues related to third-party HD Video streaming apps.", "Audio and Abbey Road Studios Mode settings are fixed to avoid issues with missing content, such as missing back button in the center display.", "The pop-up message for OTA Software updates now remains visible for a longer duration when a new update is available.", "Stability of internet connectivity has been improved, along with enhancements to how the vehicle manages temporary connection loss.", "The GPS reliability has been improved to help prevent signal loss and drifting on the map.", "Improvements to Digital Key unlocking functionality when approaching the car.", "HD Radio improvements.", "Apple CarPlay connectivity improved to more reliably reconnect during the next driving cycle. Previously, Apple CarPlay would not always reconnect as expected."], "cms_version": 25360, "released": "2025-09-01", "first_seen": "2026-08-31"}, {"version": "P1.3.17", "notes": ["Digital Key lock and unlock functionality improved", "False occupant presence reminder sensitivity improvements", "Abbey Road Studios Mode introduced. It offers a listening experience inspired by the world-famous recording studio in London. With this audio mode you can choose between four new sound presets or adjust the sound spectrum as if you are the producer in the recording room and freely move around in it. (Only applicable with Bowers & Wilkins audio system)", "Smart schedule for charging introduced.", "Set a departure time at a certain location and the vehicle will use a smart schedule to ensure its charged and ready by the desired time of departure. The vehicle delays the charging start to protect your battery and reach the desired state of charge as late as possible prior to departure.", "Curve Speed Assist introduced. CSA will reduce speed in curves to improve the driving experience when using pilot assist. The function has been added to the Assist menu in the car with ON/OFF settings.", "HD Radio (Hybrid Digital Radio) introduced (North American markets only). HD Radio provides reliable, high-definition digital sound and can show song titles, artists, albums, and station information on the center display. You can also get information such as weather alerts, the latest sports scores, and emergency messages.", "Onboarding: Connect keys to profile settings have now been added to the onboarding section for all new vehicles, allowing the driver to connect the vehicles keys to the driver's profile already when setting up the vehicle for the first time.", "Assigning a key to your profile ensures that your profile is automatically selected when you unlock the car or the driver door using the key.", "Stolen Vehicle Tracking introduced (European and North American countries only).", "Stolen Vehicle Tracking enables the possibility for the Polestar Assistance call center to track the vehicle when reported stolen.", "Change in logic of parking assist camera to always show reverse camera view when vehicle is placed in reverse. Cars with Split screen view with 360-camera and rear-view camera will show the split screen when the vehicle is placed in reverse.", "Bug fix for issue where the connection between a driver profile and a connected key would disappear after the vehicle has been parked for extended periods. . All key connections will now remain until they are manually removed from the driver profile.", "Adaptive High beam improved for a quicker response time after a meeting scenario has occurred.", "Fix for issue with Fahrenheit temperature reverting back to 62. (US market only)", "NFC reader in door handle improved. By placing your fingers under the door handle, a reset will now be triggered which will re-enable the NFC-readers", "Additional information now added to the HUD (Head-Up Display)", "ACC/Pilot assist and Set speed is now shown in the HUD", "### Additional improvements", "Lock and unlock car when approaching and leaving functionality improved", "ETA (Estimated Time of Arrival) now added to the driver display when a destination has been set and the map view is active in the driver display.", "Bug fix to now enable possibility to change charging settings for a location via the mobile App.", "Pre-conditioning timer settings now remain overnight", "AC & Heat pump performance improvements", "Low state of charge warning will no longer be displayed whilst the vehicle is charging", "Rear camera cleaning logic improved to add a delay to allow time for fluid valve to switch from rear window to rear camera.", "Climate setting improvement to issue with settings not being available in the centre display", "Improved sound when phone is connected via Bluetooth", "Stability improvements to in-car connectivity in car", "Infotainment system stability improvements", "Stability improvements for AC charging. (US market only)"], "cms_version": 25260, "released": "2025-06-23", "first_seen": "2026-08-31"}, {"version": "P1.2.16", "notes": ["General stability improvements."], "cms_version": 25170, "released": "2025-04-21", "first_seen": "2026-08-31"}, {"version": "P1.2.15", "notes": ["Power-operated soft close tailgate with foot sensor operation improved to allow the tailgate to trigger after first button press or foot kick", "Alarm sensor logic changed so the alarm sensor does not flash during driving.", "Centre display light intensity improvements that prevent the screen from flickering when switching between day and night mode.", "Performance app enabled. The Performance app can be downloaded from Google Play Store and is a fun way to transform performance into numbers when it is safe to do so. Polestar drivers can record their acceleration times, see the G-forces created, and perfect their launch control technique", "Additional improvements:", "AC-charging on 1-phase has been improved to avoid interrupted charging.", "False seat belt reminders stability improvements", "False occupant presence reminder sensitivity improvements", "Charging screen stability improvements where previously the center display changes to the charging screen during a drive cycle.", "Automatic wiper sensitivity setting is now stored in between drive cycles.", "The car will always choose automatic mode as default between drive cycles. This change however allows you to select and change the sensitivity of the rain sensor used in automatic mode and will now be saved between drive cycles.", "Digital key and key fob profile connection improvements"], "cms_version": 25140, "released": "2025-03-31", "first_seen": "2026-08-31"}, {"version": "P1.2.6", "notes": ["Walk-away locking introduced", "Wireless Apple CarPlay introduced", "Digital key for Android devices introduced (check the compatibility of your device on the phone manufacturer website):", "It is now possible to activate your Samsung or Google Pixel device as Primary digital key, by following the activation email with the pairing code or by scanning the QR code found under the car keys menu in the owner profile.", "You can share your key cross-platform (from an Apple device to a Samsung/Google Pixel device, and vice versa).", "Automatic wiper activation when selecting gear (drive or reverse)", "Wireless phone charger behaviour improved (memory setting on/off between drive cycles introduced)", "Rear view mirror auto dimming enabled (interior and exterior)", "Audio stability improvements", "General stability improvements for interior lighting (white/gold now for all vehicles)", "Centre Display light intensity improvements", "Screen cleaning mode introduced for infotainment system", "General stability improvements for infotainment system", "Seat and steering wheel functionality improvements", "Hands-off detection improvements", "Power-operated soft close tailgate with foot sensor sensitivity improvements", "Bluetooth connection stability improvements", "General stability improvements"], "cms_version": 25040, "released": "2025-01-20", "first_seen": "2026-08-31"}, {"version": "P1.1.23", "notes": ["Stability improvements for occupant presence detection.", "General stability improvements."], "cms_version": 24500, "released": "2024-12-09", "first_seen": "2026-08-31"}, {"version": "P1.1.22", "notes": ["Note: The release of this software is only to improve the over the air functionality. The SW content in this update is identical to P1.1.21", "Compatibility update"], "cms_version": 24480, "released": "2024-11-25", "first_seen": "2026-08-31"}, {"version": "P1.1.21", "notes": ["Enabling digital key for Apple devices (Requires activation email).", "Stability improvements for occupant presence detection.", "Stability improvements for key recognition.", "Sensitivity improvements for hands-on detection.", "Auto calibration for TPMS functionality.", "Improvements for cabin climate timer.", "After the over-the-air (OTA) update, one or several windows might lose calibration. If this occurs, roll the affected window(s) all the way down and then all the way up and hold the window switch for one additional second. A manual initialization will be performed, and the calibration restored."], "cms_version": 24460, "released": "2024-11-11", "first_seen": "2026-08-31"}, {"version": "P1.1.14", "notes": ["General stability improvements."], "cms_version": 24420, "released": "2024-10-14", "first_seen": "2026-08-31"}, {"version": "P1.1.11", "notes": ["General stability improvements."], "cms_version": 24390, "released": "2024-09-23", "first_seen": "2026-08-31"}, {"version": "P1.1.8", "notes": ["General stability improvements."], "cms_version": 24370, "released": "2024-09-09", "first_seen": "2026-08-31"}, {"version": "P1.1.6", "notes": ["General stability improvements."], "cms_version": 24360, "released": "2024-09-02", "first_seen": "2026-08-31"}, {"version": "P1.0.4", "notes": ["General stability improvements."], "cms_version": 24250, "released": "2024-06-17", "first_seen": "2026-08-31"}]};
 const MODELS = [{"slug": "polestar-2", "label": "Polestar 2", "manual_url": "https://www.polestar.com/uk/manual/polestar-2/2027/software-updates/"}, {"slug": "polestar-3", "label": "Polestar 3", "manual_url": "https://www.polestar.com/uk/manual/polestar-3/2025/software-updates/"}];
+const META = {"polestar-2": {}, "polestar-3": {"space_software_version": 26380, "upcoming": []}};
 const SCRAPED = "2026-08-31";
 
 // version comparison: strip leading P, compare numerically
@@ -219,11 +239,51 @@ function fmtDate(iso){
   return (+m[3])+' '+months[(+m[2])-1]+' '+m[1];
 }
 
+// ---- release-cadence helpers (ported from the Polestar 4 tracker) ----
+const DAY = 86400000;
+const parseISO = s=>{const [y,m,d]=s.split('-').map(Number);return new Date(Date.UTC(y,m-1,d));};
+const todayUTC = ()=>{const n=new Date();return new Date(Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate()));};
+const fmtD = d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
+const daysBetween = (a,b)=>Math.round((b-a)/DAY);
+const plural = (n,w)=>n+' '+w+(n===1?'':'s');
+// build 26380 · 2026 wk 38 — the YYWWW code (last digit is a sub-revision).
+function buildLabel(iv){
+  const s=String(iv);
+  if(!/^\d{5,6}$/.test(s)) return 'build '+escapeHtml(s);
+  return 'build '+escapeHtml(s)+' <small>· 20'+s.slice(0,2)+' wk '+s.slice(2,4)+'</small>';
+}
+// numpy-style linear-interpolation percentile over a sorted numeric array.
+function percentile(sorted,p){
+  if(!sorted.length) return 0;
+  const idx=(sorted.length-1)*p, lo=Math.floor(idx), hi=Math.ceil(idx);
+  return lo===hi ? sorted[lo] : sorted[lo]+(idx-lo)*(sorted[hi]-sorted[lo]);
+}
+// Forecast next release from the gaps between past dated releases (newest-first list
+// in). Returns null when there aren't enough dated releases to estimate.
+function computeForecast(list){
+  const dated = list.filter(v=>v.released).map(v=>({version:v.version, d:parseISO(v.released)}));
+  if(dated.length < 3) return null;                 // need a few gaps to be meaningful
+  const asc = dated.slice().sort((a,b)=>a.d-b.d);   // oldest -> newest
+  const intervals=[];
+  for(let i=1;i<asc.length;i++) intervals.push(daysBetween(asc[i-1].d, asc[i].d));
+  const sorted = intervals.slice().sort((a,b)=>a-b);
+  const n=sorted.length;
+  const median = n%2 ? sorted[(n-1)/2] : Math.round((sorted[n/2-1]+sorted[n/2])/2);
+  const p25=Math.round(percentile(sorted,0.25)), p75=Math.round(percentile(sorted,0.75));
+  const last=asc[asc.length-1], now=todayUTC();
+  const sinceLast=daysBetween(last.d, now);         // negative if the build week is still ahead
+  const future=last.d>now;                          // derived date can lead the actual rollout
+  const predicted=new Date(last.d.getTime()+median*DAY);
+  const overdue=now>predicted, overdueBy=daysBetween(predicted, now);
+  const winStart=new Date(last.d.getTime()+p25*DAY), winEnd=new Date(last.d.getTime()+p75*DAY);
+  return {last, sinceLast, future, median, p25, p75, predicted, overdue, overdueBy, winStart, winEnd};
+}
+
 function render(list){
   tl.innerHTML='';
   if(!list.length){ emptyEl.style.display='block'; return; }
   emptyEl.style.display='none';
-  list.forEach((v)=>{
+  list.forEach((v, i)=>{
     const isLatest = (v===versions[0]);
     const noteCount = v.notes.filter(n=>!n.startsWith('### ')).length;
     // Prefer the derived release date ("Released ~"); fall back to first_seen
@@ -231,9 +291,23 @@ function render(list){
     let dateLine = '';
     if(v.released){
       dateLine = 'Released ~'+fmtDate(v.released);
+      // Days since the previous (next-older) dated release, P4-style. `list` is
+      // newest-first, so scan forward for the next entry that also has a date.
+      if(v.released){
+        for(let j=i+1;j<list.length;j++){
+          if(list[j].released){
+            const gap = daysBetween(parseISO(list[j].released), parseISO(v.released));
+            if(gap>0) dateLine += ' <span class="gap">· '+gap+' day'+(gap===1?'':'s')+' after previous</span>';
+            break;
+          }
+        }
+      }
     } else if(v.first_seen){
       dateLine = 'First tracked '+fmtDate(v.first_seen);
     }
+    // Build-week code for traceability (API models only carry cms_version).
+    const buildLine = v.cms_version ? '<span class="build">'+buildLabel(v.cms_version)+'</span>' : '';
+    const metaLine = [buildLine, dateLine].filter(Boolean).join(dateLine&&buildLine?' · ':'');
     const entry = document.createElement('div');
     entry.className = 'entry'+(isLatest?' latest':'');
     entry.id = activeSlug+'-'+v.version.replace(/\./g,'-');
@@ -241,7 +315,7 @@ function render(list){
       '<details class="card"'+(isLatest?' open':'')+'>'+
         '<summary>'+
           '<span class="ver"><span class="p">P</span>'+escapeHtml(v.version.replace(/^P/i,''))+
-            (dateLine?'<span class="seen">'+escapeHtml(dateLine)+'</span>':'')+
+            (metaLine?'<span class="seen">'+metaLine+'</span>':'')+
           '</span>'+
           '<span class="tags">'+
             (isLatest?'<span class="pill latest">Latest</span>':'')+
@@ -255,16 +329,86 @@ function render(list){
   });
 }
 
+// Banner: P3 (API, dated) shows a release-cadence forecast; other models keep the
+// static "Latest released version" banner.
+function renderBanner(){
+  const labelEl=document.getElementById('bannerLabel');
+  const verEl=document.getElementById('latestVer');
+  const subEl=document.getElementById('bannerSub');
+  const badgeWrap=document.getElementById('latestBadgeWrap');
+  const badgeEl=document.getElementById('latestBadge');
+  const f = versions.length ? computeForecast(versions) : null;
+  if(f){
+    labelEl.textContent='Predicted next update';
+    verEl.textContent='~'+fmtD(f.predicted);
+    if(f.future){
+      // The latest build's week hasn't arrived yet (derived date leads the rollout).
+      // Don't claim it was released "-N days ago" — describe it as the pending build.
+      subEl.textContent='Latest build ('+f.last.version+') is dated ~'+fmtD(f.last.d)+' (build week not yet reached). '
+        +'Past releases land ~'+f.p25+'–'+f.p75+' days apart (the middle 50% of gaps); '
+        +'the estimate uses a median gap of '+f.median+' days.';
+      badgeWrap.className='badge';
+      badgeEl.textContent='Due in ~'+daysBetween(todayUTC(), f.predicted)+' days';
+    }else if(f.overdue){
+      subEl.textContent='Last official update ('+f.last.version+') was '+f.sinceLast+' days ago. '
+        +'The likely window ('+fmtD(f.winStart)+' – '+fmtD(f.winEnd)+', the middle 50% of past gaps) '
+        +'has passed — now ~'+f.overdueBy+' days past the median estimate of '+f.median+' days.';
+      badgeWrap.className='badge warn';
+      badgeEl.textContent='~'+f.overdueBy+' days overdue (est.)';
+    }else{
+      subEl.textContent='Last official update ('+f.last.version+') was '+f.sinceLast+' days ago. '
+        +'Past releases land ~'+f.p25+'–'+f.p75+' days apart (the middle 50% of gaps); '
+        +'the likely window is '+fmtD(f.winStart)+' – '+fmtD(f.winEnd)+'.';
+      badgeWrap.className='badge';
+      badgeEl.textContent='Due in ~'+(-f.overdueBy)+' days';
+    }
+  }else{
+    labelEl.textContent='Latest released version';
+    verEl.textContent=versions.length?versions[0].version:'—';
+    subEl.textContent="This is the newest version documented in Polestar's manual for the selected model. It is delivered Over-the-Air (OTA) or at a workshop, and rolls out gradually by market and model year.";
+    badgeWrap.className='badge';
+    badgeEl.textContent='Current';
+  }
+}
+
+// "In the pipeline": builds Polestar registered but hasn't published notes for.
+// Hidden when empty (the common case).
+function renderPipeline(){
+  const box=document.getElementById('upcoming');
+  const up=((META[activeSlug]||{}).upcoming)||[];
+  if(!up.length){ box.style.display='none'; box.innerHTML=''; box.open=false; return; }
+  const asc=up.slice().sort((a,b)=>a.internal_version-b.internal_version);
+  let rows='';
+  for(const u of asc){
+    const named = u.version && u.version!=='0.0.0';
+    rows += '<div class="up-row">'
+      + '<span class="name'+(named?'':' unnamed')+'">'+(named?escapeHtml(u.version):'Unnamed build')+'</span>'
+      + '<span class="build">'+buildLabel(u.internal_version)+'</span>'
+      + '</div>';
+  }
+  box.innerHTML =
+    '<summary><h3>In the pipeline</h3>'
+    + '<span class="pill count">'+plural(asc.length,'build')+' registered, not yet released</span>'
+    + '<span class="chev">&#9654;</span></summary>'
+    + '<p class="hint">Polestar has registered these software versions in its content API, but hasn\'t '
+    + 'published release notes for them yet — they\'re the likely next over-the-air updates. '
+    + 'The week is when the build was created, not a release date.</p>'
+    + rows;
+  box.style.display='';
+}
+
 function selectModel(slug){
   activeSlug = slug;
   versions = (DATA[slug]||[]).slice().sort(cmp); // newest first
   // tab state
   tabsEl.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.slug===slug)));
-  // stats + banner
+  // stats
   document.getElementById('statCount').textContent = versions.length;
   document.getElementById('statLatest').textContent = versions.length?versions[0].version.replace(/^P/i,''):'—';
   document.getElementById('statOldest').textContent = versions.length?versions[versions.length-1].version.replace(/^P/i,''):'—';
-  document.getElementById('latestVer').textContent = versions.length?versions[0].version:'—';
+  // banner + pipeline (per-model)
+  renderBanner();
+  renderPipeline();
   // reset search + render
   search.value='';
   render(versions);

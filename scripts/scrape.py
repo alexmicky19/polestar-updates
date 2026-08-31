@@ -43,6 +43,10 @@ MODELS = [
 # Public, unauthenticated Polestar release-notes JSON API (backs the manual pages).
 API_BASE = "https://support-car-content.polestar.volvo.care"
 
+# Lists every model and the software versions Polestar has *registered* (incl. builds
+# not yet published as release notes). Used to derive the "in the pipeline" list.
+AVAILABLE_MODELS_PATH = "/api/car-content/available-car-models"
+
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
 
 SITE_URL = "https://alexmicky19.github.io/polestar-updates/"
@@ -221,11 +225,14 @@ def _seg_version(seg: dict) -> str | None:
     return None
 
 
-def fetch_api_versions(model_code: str) -> list:
+def fetch_api_versions(model_code: str):
     """Resolve a model's en-GB release-notes document from the JSON API and return
-    a list of {version, notes[], cms_version, released?}. Segments that share a
-    version (market/config splits) are merged. Ordering is left to the shared sort in
-    scrape_model. P2 is not in the API — only API models use this."""
+    ``(versions, space_software_version)`` where versions is a list of
+    {version, notes[], cms_version, released?}. Segments that share a version
+    (market/config splits) are merged. Ordering is left to the shared sort in
+    scrape_model. ``space_software_version`` is the manifest's newest published
+    build code (the "in the pipeline" threshold), or None. P2 is not in the API —
+    only API models use this."""
     manifest = fetch_api_json(f"/api/car-content/SOFTWARE_RELEASE_NOTES/{model_code}/UNTIL/99.0.0")
     content = manifest.get("content", [])
     if not content:
@@ -277,7 +284,56 @@ def fetch_api_versions(model_code: str) -> list:
         versions.append(v)
     if not versions:
         raise SystemExit(f"API returned zero release-notes segments for model {model_code}")
-    return versions
+    # The newest published build code — anything registered above this is "upcoming".
+    space = manifest.get("spaceSoftwareVersion")
+    try:
+        space = int(space) if space is not None else None
+    except (TypeError, ValueError):
+        space = None
+    return versions, space
+
+
+def fetch_api_pipeline(model_code: str, published_max) -> list:
+    """Return builds Polestar has *registered* but not yet published notes for:
+    entries in `available-car-models` whose YYWW `internalVersion` is greater than
+    the newest published build (`published_max`). Best-effort — returns [] on any
+    miss so a pipeline hiccup never aborts the scrape. Each item is
+    {internal_version, version} sorted by internal_version ascending; `version` is
+    the `carVersion` (P-prefixed) or None when Polestar hasn't named the build yet."""
+    if published_max is None:
+        return []
+    try:
+        doc = fetch_api_json(AVAILABLE_MODELS_PATH)
+    except Exception:
+        return []
+    models = doc if isinstance(doc, list) else doc.get("models") or doc.get("carModels") or []
+    if not isinstance(models, list):
+        return []
+    entry = next((m for m in models
+                  if isinstance(m, dict) and str(m.get("modelCode")) == str(model_code)), None)
+    if not entry:
+        return []
+    swvs = entry.get("softwareVersions")
+    if not isinstance(swvs, list):
+        return []
+    upcoming = []
+    for sw in swvs:
+        if not isinstance(sw, dict):
+            continue
+        try:
+            iv = int(sw.get("internalVersion"))
+        except (TypeError, ValueError):
+            continue
+        if iv <= published_max:
+            continue
+        car = sw.get("carVersion")
+        version = None
+        if isinstance(car, str) and car.strip() and car.strip().lower() not in ("none", "0.0.0"):
+            c = car.strip()
+            version = c if c.upper().startswith("P") else "P" + c
+        upcoming.append({"internal_version": iv, "version": version})
+    upcoming.sort(key=lambda u: u["internal_version"])
+    return upcoming
 
 
 def version_key(v: str):
@@ -344,13 +400,19 @@ def build_feed(model: dict, versions: list) -> str:
     )
 
 
-def scrape_model(model: dict, local: str | None) -> list:
-    """Return the sorted, first-seen-stamped version list for one model.
+def scrape_model(model: dict, local: str | None):
+    """Return ``(versions, meta)`` for one model: the sorted, first-seen-stamped
+    version list plus a per-model meta dict.
 
-    Dispatches on model['source']: HTML models parse the manual page's Remix blob;
-    API models read the JSON release-notes document and carry a derived release date."""
+    Dispatches on model['source']: HTML models parse the manual page's Remix blob
+    (meta is empty); API models read the JSON release-notes document, carry a derived
+    release date, and populate meta with `space_software_version` and the `upcoming`
+    pipeline (builds registered but not yet published)."""
+    meta: dict = {}
     if model.get("source") == "api":
-        versions = fetch_api_versions(model["model_code"])
+        versions, space = fetch_api_versions(model["model_code"])
+        meta["space_software_version"] = space
+        meta["upcoming"] = fetch_api_pipeline(model["model_code"], space)
     else:
         page = pathlib.Path(local).read_text(encoding="utf-8", errors="replace") if local else fetch(model["manual_url"])
         rn = extract_release_notes_object(page)
@@ -364,7 +426,7 @@ def scrape_model(model: dict, local: str | None) -> list:
     today = datetime.date.today().isoformat()
     for v in versions:
         v["first_seen"] = seen.get(v["version"], today)
-    return versions
+    return versions, meta
 
 
 def main():
@@ -378,25 +440,35 @@ def main():
     DATA_DIR.mkdir(exist_ok=True)
     today = datetime.date.today().isoformat()
     all_data = {}  # slug -> versions, for the embedded DATA object
+    all_meta = {}  # slug -> meta (space_software_version, upcoming), for META object
 
     for model in MODELS:
-        versions = scrape_model(model, local_map.get(model["slug"]))
+        versions, meta = scrape_model(model, local_map.get(model["slug"]))
         (DATA_DIR / f"{model['slug']}.json").write_text(
             json.dumps(versions, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         (ROOT / f"feed-{model['slug']}.xml").write_text(build_feed(model, versions), encoding="utf-8")
         all_data[model["slug"]] = versions
-        print(f"  {model['slug']}: {len(versions)} versions, latest {versions[0]['version']}")
+        all_meta[model["slug"]] = meta
+        # Persist meta alongside the data for traceability (the UI reads the inlined
+        # META object, not this file). Only meaningful for API models.
+        (DATA_DIR / f"{model['slug']}.meta.json").write_text(
+            json.dumps(meta, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        up = meta.get("upcoming") or []
+        print(f"  {model['slug']}: {len(versions)} versions, latest {versions[0]['version']}"
+              + (f", {len(up)} upcoming" if model.get("source") == "api" else ""))
 
-    # Splice the combined DATA object (keyed by slug) + MODELS metadata into index.html.
+    # Splice the combined DATA object (keyed by slug) + META + MODELS metadata into index.html.
     models_meta = [{"slug": m["slug"], "label": m["label"], "manual_url": m["manual_url"]} for m in MODELS]
     out_data = json.dumps(all_data, ensure_ascii=False)
+    out_meta = json.dumps(all_meta, ensure_ascii=False)
     out_models = json.dumps(models_meta, ensure_ascii=False)
 
     index = INDEX.read_text(encoding="utf-8")
     new_index, n1 = re.subn(r"const DATA = .*?;\n", "const DATA = " + out_data + ";\n", index, count=1, flags=re.S)
+    new_index, nm = re.subn(r"const META = .*?;\n", "const META = " + out_meta + ";\n", new_index, count=1, flags=re.S)
     new_index, n2 = re.subn(r"const MODELS = .*?;\n", "const MODELS = " + out_models + ";\n", new_index, count=1, flags=re.S)
-    if n1 != 1 or n2 != 1:
-        raise SystemExit("could not locate 'const DATA'/'const MODELS' in index.html")
+    if n1 != 1 or nm != 1 or n2 != 1:
+        raise SystemExit("could not locate 'const DATA'/'const META'/'const MODELS' in index.html")
     new_index = re.sub(r'const SCRAPED = "[^"]*";', f'const SCRAPED = "{today}";', new_index)
     new_index = re.sub(r'Data captured \d{4}-\d{2}-\d{2}', f'Data captured {today}', new_index)
 

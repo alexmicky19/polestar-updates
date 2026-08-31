@@ -44,7 +44,29 @@ the tracker uses the best signal each source offers:
   usable code fall back to "First tracked".
 
 The API has no true date field — the week code is the closest available signal, so
-the tracker cannot compute exact "days between releases" or predict the next update.
+every derived date is approximate.
+
+### Build codes, cadence & forecast (Polestar 3 only)
+
+For API-sourced models the tracker mirrors the three signals the reference
+[Polestar 4 tracker](https://jaybizzle.github.io/polestar4-updates) shows. These are
+**Polestar 3 only** — Polestar 2 is HTML-scraped, has no build codes and no registered
+version list, so its rows and banner are unchanged.
+
+- **Build code on every version** — the raw `YYWW` code shown for traceability, e.g.
+  `build 26380 · 2026 wk 38`.
+- **Days between versions** — the gap in days from the previous (next-older) dated
+  release, derived from the build-week dates (e.g. `· 28 days after previous`).
+- **Predicted next update** — the banner replaces "Latest released version" with a
+  statistical estimate: the **median** of the gaps between past dated releases, added
+  to the latest release date, with a likely window (the 25th–75th-percentile gap, the
+  middle 50% of history) and an overdue / due-in badge. It is an estimate from past
+  cadence, not an announced date. When the latest build's week has not yet arrived,
+  the banner says so rather than reporting a negative "days ago".
+- **In the pipeline** — builds Polestar has *registered* in `available-car-models`
+  but not yet published notes for (`internalVersion` greater than the manifest's
+  `spaceSoftwareVersion`). This section is hidden when empty — which is the case
+  whenever the newest registered build is already the newest published one.
 
 ## Adding another model
 
