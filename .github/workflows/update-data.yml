@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: update-data
@@ -27,14 +28,58 @@ jobs:
         run: python3 scripts/scrape.py
 
       - name: Commit changes if any
+        id: commit
         run: |
           if [[ -z "$(git status --porcelain)" ]]; then
             echo "No changes — Polestar 2 data is up to date."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+
+          # Compare the freshly-scraped latest version against the versions that
+          # existed BEFORE this run, so we only notify on a genuinely new release
+          # (not a reword of an existing version's notes).
+          latest=$(python3 -c "import json;print(json.load(open('data.json'))[0]['version'])")
+          git show HEAD:data.json > /tmp/old-data.json 2>/dev/null || echo "[]" > /tmp/old-data.json
+          is_new=$(python3 -c "import json,sys; old={v['version'] for v in json.load(open('/tmp/old-data.json'))}; print('true' if sys.argv[1] not in old else 'false')" "$latest")
+
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html data.json feed.xml
-          latest=$(python3 -c "import json;print(json.load(open('data.json'))[0]['version'])")
           git commit -m "chore: update Polestar 2 software data (latest ${latest})"
           git push
+
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "latest=${latest}" >> "$GITHUB_OUTPUT"
+          echo "is_new_version=${is_new}" >> "$GITHUB_OUTPUT"
+
+      - name: Open an issue for a new version
+        if: steps.commit.outputs.is_new_version == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const latest = ${{ toJSON(steps.commit.outputs.latest) }};
+            const data = JSON.parse(fs.readFileSync('data.json', 'utf8'));
+            const entry = data.find(v => v.version === latest) || { notes: [] };
+            const notes = (entry.notes || [])
+              .map(n => n.startsWith('### ') ? `\n**${n.slice(4)}**` : `- ${n}`)
+              .join('\n');
+            const body = [
+              `A new Polestar 2 software version **${latest}** was detected and committed.`,
+              '',
+              '## Release notes',
+              notes || '_(no notes)_',
+              '',
+              '---',
+              '- [Owner\'s manual — Software updates](https://www.polestar.com/uk/manual/polestar-2/2027/software-updates/)',
+              '- [Tracker site](https://alexmicky19.github.io/polestar2-updates/)',
+              '',
+              '_Opened automatically by the update-data workflow._',
+            ].join('\n');
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `New Polestar 2 software version: ${latest}`,
+              body,
+            });
