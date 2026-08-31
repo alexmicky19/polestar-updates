@@ -2,29 +2,29 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Polestar 2 Software Updates (Unofficial)</title>
-    <link>https://alexmicky19.github.io/polestar2-updates/</link>
-    <atom:link href="https://alexmicky19.github.io/polestar2-updates/feed.xml" rel="self" type="application/rss+xml"/>
+    <link>https://alexmicky19.github.io/polestar-updates/</link>
+    <atom:link href="https://alexmicky19.github.io/polestar-updates/feed-polestar-2.xml" rel="self" type="application/rss+xml"/>
     <description>New Polestar 2 software versions and their release notes, sourced from Polestar's owner's manual. Unofficial.</description>
     <language>en-GB</language>
-    <lastBuildDate>Mon, 31 Aug 2026 15:05:20 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 31 Aug 2026 19:24:43 +0000</lastBuildDate>
     <item>
       <title>Polestar 2 software P5.1.17</title>
-      <link>https://alexmicky19.github.io/polestar2-updates/#P5-1-17</link>
-      <guid isPermaLink="false">polestar2-P5.1.17</guid>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-2-P5-1-17</link>
+      <guid isPermaLink="false">polestar-2-P5.1.17</guid>
       <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
       <description>• This software update provides minor refinements and general software improvements to Polestar 2, including improvements to the USB connection for Android Auto and Apple CarPlay.</description>
     </item>
     <item>
       <title>Polestar 2 software P5.1.9</title>
-      <link>https://alexmicky19.github.io/polestar2-updates/#P5-1-9</link>
-      <guid isPermaLink="false">polestar2-P5.1.9</guid>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-2-P5-1-9</link>
+      <guid isPermaLink="false">polestar-2-P5.1.9</guid>
       <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
       <description>• This software update is solely a compatibility update for the new model year 2027 of Polestar 2</description>
     </item>
     <item>
       <title>Polestar 2 software P5.0.10</title>
-      <link>https://alexmicky19.github.io/polestar2-updates/#P5-0-10</link>
-      <guid isPermaLink="false">polestar2-P5.0.10</guid>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-2-P5-0-10</link>
+      <guid isPermaLink="false">polestar-2-P5.0.10</guid>
       <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
       <description>• This software update provides general stability improvements to Polestar 2, including:
 
@@ -50,8 +50,8 @@ Bug fixes for all Polestar 2 vehicles:
     </item>
     <item>
       <title>Polestar 2 software P4.2.13</title>
-      <link>https://alexmicky19.github.io/polestar2-updates/#P4-2-13</link>
-      <guid isPermaLink="false">polestar2-P4.2.13</guid>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-2-P4-2-13</link>
+      <guid isPermaLink="false">polestar-2-P4.2.13</guid>
       <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
       <description>• This software update provides general stability improvements to all Polestar 2 vehicles, including:
 • Bug fix for when DC-charging sometimes delivered limited max effect
@@ -59,24 +59,24 @@ Bug fixes for all Polestar 2 vehicles:
     </item>
     <item>
       <title>Polestar 2 software P3.7.0</title>
-      <link>https://alexmicky19.github.io/polestar2-updates/#P3-7-0</link>
-      <guid isPermaLink="false">polestar2-P3.7.0</guid>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-2-P3-7-0</link>
+      <guid isPermaLink="false">polestar-2-P3.7.0</guid>
       <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
       <description>• Compatibility update
 • Note: The software content in this update is identical to P3.6.4</description>
     </item>
     <item>
       <title>Polestar 2 software P3.6.4</title>
-      <link>https://alexmicky19.github.io/polestar2-updates/#P3-6-4</link>
-      <guid isPermaLink="false">polestar2-P3.6.4</guid>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-2-P3-6-4</link>
+      <guid isPermaLink="false">polestar-2-P3.6.4</guid>
       <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
       <description>• Stability improvements to the parking assist camera
 • Minor stability improvements</description>
     </item>
     <item>
       <title>Polestar 2 software P3.5.24</title>
-      <link>https://alexmicky19.github.io/polestar2-updates/#P3-5-24</link>
-      <guid isPermaLink="false">polestar2-P3.5.24</guid>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-2-P3-5-24</link>
+      <guid isPermaLink="false">polestar-2-P3.5.24</guid>
       <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
       <description>• Road Sign Information speed limit detection improvements, including greater accuracy at for example highway exit speed limits.
 • Improvements to Lane Keeping Aid.
@@ -86,8 +86,8 @@ Bug fixes for all Polestar 2 vehicles:
     </item>
     <item>
       <title>Polestar 2 software P3.5.14</title>
-      <link>https://alexmicky19.github.io/polestar2-updates/#P3-5-14</link>
-      <guid isPermaLink="false">polestar2-P3.5.14</guid>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-2-P3-5-14</link>
+      <guid isPermaLink="false">polestar-2-P3.5.14</guid>
       <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
       <description>• Road Sign Information speed limit detection improvements, including greater accuracy at for example highway exit speed limits.
 • Improvements to Lane Keeping Aid.
@@ -95,8 +95,8 @@ Bug fixes for all Polestar 2 vehicles:
     </item>
     <item>
       <title>Polestar 2 software P3.4.4</title>
-      <link>https://alexmicky19.github.io/polestar2-updates/#P3-4-4</link>
-      <guid isPermaLink="false">polestar2-P3.4.4</guid>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-2-P3-4-4</link>
+      <guid isPermaLink="false">polestar-2-P3.4.4</guid>
       <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
       <description>• Parking view with split screen introduced, applicable only on cars built from 23w46 onwards.
 • ETA - Estimated Time of Arrival in drivers display reinstated.
@@ -106,8 +106,8 @@ Bug fixes for all Polestar 2 vehicles:
     </item>
     <item>
       <title>Polestar 2 software P3.3.16</title>
-      <link>https://alexmicky19.github.io/polestar2-updates/#P3-3-16</link>
-      <guid isPermaLink="false">polestar2-P3.3.16</guid>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-2-P3-3-16</link>
+      <guid isPermaLink="false">polestar-2-P3.3.16</guid>
       <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
       <description>• Enabling Android Auto.
 • Improved driving experience at low speed (MY21-23).
@@ -115,31 +115,31 @@ Bug fixes for all Polestar 2 vehicles:
     </item>
     <item>
       <title>Polestar 2 software P3.2.8</title>
-      <link>https://alexmicky19.github.io/polestar2-updates/#P3-2-8</link>
-      <guid isPermaLink="false">polestar2-P3.2.8</guid>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-2-P3-2-8</link>
+      <guid isPermaLink="false">polestar-2-P3.2.8</guid>
       <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
       <description>• Note: The release of this software is only to accommodate a hardware change in production. The SW content in this update is identical to P3.2.4:
 • Compatibility update</description>
     </item>
     <item>
       <title>Polestar 2 software P3.2.4</title>
-      <link>https://alexmicky19.github.io/polestar2-updates/#P3-2-4</link>
-      <guid isPermaLink="false">polestar2-P3.2.4</guid>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-2-P3-2-4</link>
+      <guid isPermaLink="false">polestar-2-P3.2.4</guid>
       <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
       <description>• Stability improvements for Digital Key.
 • Improved behaviour for Cruise Control and Adaptive Cruise Control.</description>
     </item>
     <item>
       <title>Polestar 2 software P3.1.10</title>
-      <link>https://alexmicky19.github.io/polestar2-updates/#P3-1-10</link>
-      <guid isPermaLink="false">polestar2-P3.1.10</guid>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-2-P3-1-10</link>
+      <guid isPermaLink="false">polestar-2-P3.1.10</guid>
       <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
       <description>• Stability improvements for vehicle key recognition (only for late MY24 and MY25 vehicles).</description>
     </item>
     <item>
       <title>Polestar 2 software P3.1.9</title>
-      <link>https://alexmicky19.github.io/polestar2-updates/#P3-1-9</link>
-      <guid isPermaLink="false">polestar2-P3.1.9</guid>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-2-P3-1-9</link>
+      <guid isPermaLink="false">polestar-2-P3.1.9</guid>
       <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
       <description>• Performance improvements in the infotainment system.
 • Stability improvements for the cabin climate settings.
@@ -147,8 +147,8 @@ Bug fixes for all Polestar 2 vehicles:
     </item>
     <item>
       <title>Polestar 2 software P3.1.2</title>
-      <link>https://alexmicky19.github.io/polestar2-updates/#P3-1-2</link>
-      <guid isPermaLink="false">polestar2-P3.1.2</guid>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-2-P3-1-2</link>
+      <guid isPermaLink="false">polestar-2-P3.1.2</guid>
       <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
       <description>• Climate preconditioning now with 10 minutes added to timer to account for users arriving late to the car after planning a departure time.
 • General calibration for the climate system.
@@ -156,8 +156,8 @@ Bug fixes for all Polestar 2 vehicles:
     </item>
     <item>
       <title>Polestar 2 software P3.0.3</title>
-      <link>https://alexmicky19.github.io/polestar2-updates/#P3-0-3</link>
-      <guid isPermaLink="false">polestar2-P3.0.3</guid>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-2-P3-0-3</link>
+      <guid isPermaLink="false">polestar-2-P3.0.3</guid>
       <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
       <description>• Note:
 • Software update should not be installed whilst the vehicle is charging, as this will interrupt the charging.
