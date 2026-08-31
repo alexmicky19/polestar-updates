@@ -1,0 +1,305 @@
+[
+ {
+  "version": "P3.0.33",
+  "notes": [
+   "This software update provides general improvements and bug fixes."
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P3.0.28",
+  "notes": [
+   "This software update is available for all Polestar 3 vehicles that have been upgraded with the new core computer.",
+   "The operating system, Android Automotive OS, is upgraded to Android 15. The upgrade includes overall infotainment improvements and performance, as well as increased availability to more apps through Google Play Store. Audio from video apps can now be played while driving and controlled directly via the media widget.",
+   "Additional functionality for the steering wheel buttons is introduced. The new functionality includes:",
+   "Right-hand side touch controls:",
+   "Media Controls",
+   "Voice control activation",
+   "Left-hand side touch controls:",
+   "Adaptive cruise control settings",
+   "Driver display mode switch",
+   "Switch between Pilot Assist and Adaptive Cruise Control",
+   "The feature associated with each touch zone appears in the driver display.",
+   "Launch Mode is introduced for Polestar 3 Performance, model year 2026 or newer. Launch mode enables faster take-off from a standstill.",
+   "To activate Launch Mode, while in Drive and at a standstill, press and hold the brake pedal, then press and hold the accelerator pedal. During activation, the speedometer will turn orange, an animation will appear in the driver display and confirm once Launch Mode is activated.",
+   "Android Auto is introduced. The function wirelessly mirrors your Android phone’s interface, navigation, media and messaging apps onto the Polestar 3 centre display.",
+   "As part of the Driver Monitoring System, the Driver Distraction Alert function is updated with enhanced visual and audible notifications.",
+   "Support for Horn & Lights in the Polestar app. Polestar 3 now supports remotely flashing the lights or triggering horn & lights from the Polestar app to help locate the vehicle in busy areas. Availability may vary by region.",
+   "Air purification support in the Polestar app. This functionality allows you to remotely start an air purification cycle from the Polestar app. Available on Polestar 3 equipped with the optional Advance Air Cleaner (Plus pack).",
+   "The media player now includes a button with direct access to sound settings.",
+   "Car status view can now display the current tyre pressure for each individual wheel position in the centre display. This function is only available for model year 2026 or newer.",
+   "### Additional improvements",
+   "Improvements to Exit Assist, now including a temporary prevention of opening the door – in addition to an audible and visual warning – if pedestrians, bicycles, or other vehicles approaching from the rear are detected. A double pull of the door latch will override the temporary hold.",
+   "Previously, Exit Assist only provided an audible and visual warning when detecting objects approaching from the rear.",
+   "Improvements to Apple CarPlay, now supporting Dolby Atmos, delivering a more immersive and directional sound experience when supported content is played.",
+   "Improvements to the foot-operated tailgate, including overall robustness and a longer activation time with extended audible feedback when closing the tailgate.",
+   "Improvements to rear wiper behaviour, including a shorter wiper cleaning interval reduced from 10 to 8 seconds, and automatic activation of the rear wiper when reversing if the front wipers are already active.",
+   "Improvements to the locking and unlocking functionality connected to approach recognition via ultra-wideband (UWB) connection.",
+   "### Bug fixes",
+   "Bug fix for when the phone wallet was displayed on the phone while it was placed on the wireless phone charger.",
+   "Bug fix for when the rear defroster did not deactivate as expected during automatic start conditions.",
+   "Bug fix for when the interior illumination brightness and theme did not respond correctly.",
+   "Bug fix for when the alarm could be triggered when the car was unlocked and opened via the passenger door."
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P3.0.26",
+  "notes": [
+   "This software update is available for all Polestar 3 vehicles that have been upgraded with the new core computer.",
+   "The operating system, Android Automotive OS, is upgraded to Android 15. The upgrade includes overall infotainment improvements and performance, as well as increased availability to more apps through Google Play Store. Audio from video apps can now be played while driving and controlled directly via the media widget.",
+   "Additional functionality for the steering wheel buttons is introduced. The new functionality includes:",
+   "Right-hand side touch controls:",
+   "Media Controls",
+   "Voice control activation",
+   "Left-hand side touch controls:",
+   "Adaptive cruise control settings",
+   "Driver display mode switch",
+   "Switch between Pilot Assist and Adaptive Cruise Control",
+   "The feature associated with each touch zone appears in the driver display.",
+   "Launch Mode is introduced for Polestar 3 Performance, model year 2026 or newer. Launch mode enables faster take-off from a standstill.",
+   "To activate Launch Mode, while in Drive and at a standstill, press and hold the brake pedal, then press and hold the accelerator pedal. During activation, the speedometer will turn orange, an animation will appear in the driver display and confirm once Launch Mode is activated.",
+   "Android Auto is introduced. The function wirelessly mirrors your Android phone’s interface, navigation, media and messaging apps onto the Polestar 3 centre display.",
+   "As part of the Driver Monitoring System, the Driver Distraction Alert function is updated with enhanced visual and audible notifications.",
+   "The media player now includes a button with direct access to sound settings.",
+   "Car status view can now display the current tyre pressure for each individual wheel position in the centre display. This function is only available for model year 2026 or newer.",
+   "### Additional improvements",
+   "Improvements to Exit Assist, now including a temporary prevention of opening the door – in addition to an audible and visual warning – if pedestrians, bicycles, or other vehicles approaching from the rear are detected. A double pull of the door latch will override the temporary hold.",
+   "Previously, Exit Assist only provided an audible and visual warning when detecting objects approaching from the rear.",
+   "Improvements to Apple CarPlay, now supporting Dolby Atmos, delivering a more immersive and directional sound experience when supported content is played.",
+   "Improvements to the foot-operated tailgate, including overall robustness and a longer activation time with extended audible feedback when closing the tailgate.",
+   "Improvements to rear wiper behaviour, including a shorter wiper cleaning interval reduced from 10 to 8 seconds, and automatic activation of the rear wiper when reversing if the front wipers are already active.",
+   "Improvements to the locking and unlocking functionality connected to approach recognition via ultra-wideband (UWB) connection.",
+   "### Bug fixes",
+   "Bug fix for when the phone wallet was displayed on the phone while it was placed on the wireless phone charger.",
+   "Bug fix for when the rear defroster did not deactivate as expected during automatic start conditions.",
+   "Bug fix for when the interior illumination brightness and theme did not respond correctly.",
+   "Bug fix for when the alarm could be triggered when the car was unlocked and opened via the passenger door."
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P2.1.26",
+  "notes": [
+   "This software update provides general improvements and compatibility updates. It includes the software content released in all previous updates."
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P2.1.25",
+  "notes": [
+   "This software update provides general improvements and compatibility updates. It includes the software content released in all previous updates."
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P2.1.24",
+  "notes": [
+   "This software update provides general improvements and compatibility updates. It includes the software content released in 2.1.22."
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P2.1.22",
+  "notes": [
+   "This software update provides general stability improvements to all Polestar 3 vehicles upgraded with the new core computer.",
+   "As part of Pilot assist and Adaptive Cruise control, Adapt to speed limit is introduced. The Adapt to speed limit is a new function that allows the driver to accept or reject offers to adapt the set speed limit according to the updated roads’ speed limits",
+   "The driver can enable Adapt to speed limit in the driver settings menu",
+   "This functionality requires the vehicle to have Road Sign Information activated",
+   "Time gap setting when using Adaptive cruise control or Pilot assist is introduced. The driver can select between three distance levels to vehicles ahead, in the centre display, improving comfort when using Adaptive cruise control or Pilot Assist.",
+   "Automatic folding and unfolding of exterior mirrors when locking and unlocking the car is introduced",
+   "Previously, it was only possible to manually fold and unfold the mirrors in settings",
+   "Park Assist pilot is introduced in cars equipped with Pilot pack",
+   "Park Assist pilot supports the driver with automatic parking in parallel parking spots. When driving at low speed, the function detects suitable parking spaces and available slots will be shown in camera view on the centre display. The driver can choose the parking spot and activate the automatic parking in the display. The vehicle will then steer and brake under driver supervision",
+   "When using the Park Assist pilot to leave a parallel parking spot, the driver can select to exit the parking space either to the left or to right",
+   "In-car communication using voice amplification and built-in microphones is introduced. This feature means front occupants don’t need to raise their voices to be heard by rear seat occupants while driving",
+   "The driver and front seat passenger can speak naturally as their conversation is amplified through the car’s speakers, which adjusts the output volume at high speeds or with music playing",
+   "The function is available in three settings (low, medium and high) which adapt the overall volume for all needs, including for hearing impairments",
+   "In cars equipped with Bowers & Wilkins for Polestar, additional rear microphones enable easy communication between front and rear seats improving this feature further",
+   "### Additional improvements",
+   "Improvements to high-voltage battery consumption when vehicle not in use, including prevention of battery consumption while keeping the car core system active over time while parked",
+   "Improvements to the centre display, including the possibility for users to re-order downloaded apps in the app centre. To do this, press and hold an app icon, and then drag it to the place you desire",
+   "Improvements to the driver adjustment profile memory, including the exterior mirrors and driver seat to adjust according to saved preferences when switching between profiles",
+   "Improvements to the headlamp low beam functionality, including a map data-based prediction of upcoming tunnels. This allows the low beam functionality to activate prior to entering a tunnel during daytime",
+   "The function is active when the light setting is in Auto",
+   "Improvements to the headlamp Adaptive High Beam functionality, including the function to now also be active on larger roads, such as motorways",
+   "By providing additional lighting, using the most outer headlamp, this improves visibility towards road edges and results in added safety and more comfortable driving. In addition, the functionality has improved behaviour with smoother transitions around objects",
+   "Previously, the system switched to low beam in situations where roads such as motorways were detected",
+   "Improvements to the driver monitoring camera, including the following updates",
+   "During use of Pilot assist and Adaptive Cruise Control, including assurance from the camera to confirm that the driver is paying attention before allowing the vehicle to follow traffic from standstill. The time allowed where the car is in standstill before proceeding to follow traffic has been increased",
+   "If the driver is deemed to be unresponsive, the function is also updated to give distraction warnings even when the Driver Alert setting is turned off",
+   "Improvement to Emergency Stop Assist, including a check-up call to Polestar Connect to ensure the driver safety. If the driver intervenes and interrupts the Emergency Stop Assist before the vehicle has been brought to complete standstill, the call will be disconnected",
+   "Availability varies between regions. Contact Polestar support for more information.",
+   "Improvements to Collision Avoidance Side, including function adaptation based on driver awareness to increase robustness for cut in/out scenarios. Driver awareness is taken into consideration when to engage in emergency steering functions",
+   "This also includes function adaptation to intervene in situations where the driver is deemed inattentive and while cutting a curve, even though Lane Keeping Aid steering is turned off by the driver",
+   "Improvements to the Occupant detection reminder, including adding functionality where the exterior position lights will be activated to provide a visual warning in addition to the audible warning",
+   "Improvements to the rear luggage compartment lighting, including the light to now activate across all unlocking methods, ensuring consistent visibility regardless of access point",
+   "### Bug fixes",
+   "Bug fix for when the tailgate wasn’t opening fully due to the car detecting motion of users exiting the vehicle",
+   "Bug fix for when the interior lighting theme, white or gold, intermittently didn’t allow switching between the colours",
+   "Bug fix for when Google Maps would start in dark mode during daytime"
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P1.4.12",
+  "notes": [
+   "Fix for seat position so that it is now correctly connected to the selected driver profile.",
+   "Solution for performance issues related to third-party HD Video streaming apps.",
+   "Audio and Abbey Road Studios Mode settings are fixed to avoid issues with missing content, such as missing back button in the center display.",
+   "The pop-up message for OTA Software updates now remains visible for a longer duration when a new update is available.",
+   "Stability of internet connectivity has been improved, along with enhancements to how the vehicle manages temporary connection loss.",
+   "The GPS reliability has been improved to help prevent signal loss and drifting on the map.",
+   "Improvements to Digital Key unlocking functionality when approaching the car.",
+   "Apple CarPlay connectivity improved to more reliably reconnect during the next driving cycle. Previously, Apple CarPlay would not always reconnect as expected."
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P1.3.18",
+  "notes": [
+   "Digital Key lock and unlock functionality improved",
+   "False occupant presence reminder sensitivity improvements"
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P1.3.17",
+  "notes": [
+   "Abbey Road Studios Mode introduced. It offers a listening experience inspired by the world-famous recording studio in London. With this audio mode you can choose between four new sound presets or adjust the sound spectrum as if you are the producer in the recording room and freely move around in it. (Only applicable with Bowers & Wilkins audio system)",
+   "Smart schedule for charging introduced.",
+   "Set a departure time at a certain location and the vehicle will use a smart schedule to ensure its charged and ready by the desired time of departure. The vehicle delays the charging start to protect your battery and reach the desired state of charge as late as possible prior to departure.",
+   "Curve Speed Assist introduced. CSA will reduce speed in curves to improve the driving experience when using pilot assist. The function has been added to the Assist menu in the car with ON/OFF settings.",
+   "HD Radio (Hybrid Digital Radio) introduced (North American markets only). HD Radio provides reliable, high-definition digital sound and can show song titles, artists, albums, and station information on the center display. You can also get information such as weather alerts, the latest sports scores, and emergency messages.",
+   "Onboarding: Connect keys to profile settings have now been added to the onboarding section for all new vehicles, allowing the driver to connect the vehicles keys to the driver's profile already when setting up the vehicle for the first time.",
+   "Assigning a key to your profile ensures that your profile is automatically selected when you unlock the car or the driver door using the key.",
+   "Stolen Vehicle Tracking introduced (European and North American countries only).",
+   "Stolen Vehicle Tracking enables the possibility for the Polestar Assistance call center to track the vehicle when reported stolen.",
+   "Change in logic of parking assist camera to always show reverse camera view when vehicle is placed in reverse. Cars with Split screen view with 360-camera and rear-view camera will show the split screen when the vehicle is placed in reverse.",
+   "Bug fix for issue where the connection between a driver profile and a connected key would disappear after the vehicle has been parked for extended periods. . All key connections will now remain until they are manually removed from the driver profile.",
+   "Adaptive High beam improved for a quicker response time after a meeting scenario has occurred.",
+   "NFC reader in door handle improved. By placing your fingers under the door handle, a reset will now be triggered which will re-enable the NFC-readers",
+   "Additional information now added to the HUD (Head-Up Display)",
+   "ACC/Pilot assist and Set speed is now shown in the HUD",
+   "### Additional improvements",
+   "Lock and unlock car when approaching and leaving functionality improved",
+   "ETA (Estimated Time of Arrival) now added to the driver display when a destination has been set and the map view is active in the driver display.",
+   "Bug fix to now enable possibility to change charging settings for a location via the mobile App.",
+   "Pre-conditioning timer settings now remain overnight",
+   "AC & Heat pump performance improvements",
+   "Low state of charge warning will no longer be displayed whilst the vehicle is charging",
+   "Rear camera cleaning logic improved to add a delay to allow time for fluid valve to switch from rear window to rear camera.",
+   "Climate setting improvement to issue with settings not being available in the centre display",
+   "Improved sound when phone is connected via Bluetooth",
+   "Stability improvements to in-car connectivity in car",
+   "Infotainment system stability improvements"
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P1.2.15",
+  "notes": [
+   "Power-operated soft close tailgate with foot sensor operation improved to allow the tailgate to trigger after first button press or foot kick",
+   "Alarm sensor logic changed so the alarm sensor does not flash during driving.",
+   "Centre display light intensity improvements that prevent the screen from flickering when switching between day and night mode.",
+   "Performance app enabled. The Performance app can be downloaded from Google Play Store and is a fun way to transform performance into numbers when it is safe to do so. Polestar drivers can record their acceleration times, see the G-forces created, and perfect their launch control technique",
+   "Additional improvements:",
+   "AC-charging on 1-phase has been improved to avoid interrupted charging.",
+   "False seat belt reminders stability improvements",
+   "False occupant presence reminder sensitivity improvements",
+   "Charging screen stability improvements where previously the center display changes to the charging screen during a drive cycle.",
+   "Automatic wiper sensitivity setting is now stored in between drive cycles.",
+   "The car will always choose automatic mode as default between drive cycles. This change however allows you to select and change the sensitivity of the rain sensor used in automatic mode and will now be saved between drive cycles.",
+   "Digital key and key fob profile connection improvements"
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P1.2.6",
+  "notes": [
+   "Walk-away locking introduced",
+   "Wireless Apple CarPlay introduced",
+   "Digital key for Android devices introduced (check the compatibility of your device on the phone manufacturer website):",
+   "It is now possible to activate your Samsung or Google Pixel device as Primary digital key, by following the activation email with the pairing code or by scanning the QR code found under the car keys menu in the owner profile.",
+   "You can share your key cross-platform (from an Apple device to a Samsung/Google Pixel device, and vice versa).",
+   "Automatic wiper activation when selecting gear (drive or reverse)",
+   "Wireless phone charger behaviour improved (memory setting on/off between drive cycles introduced)",
+   "Rear view mirror auto dimming enabled (interior and exterior)",
+   "Audio stability improvements",
+   "General stability improvements for interior lighting (white/gold now for all vehicles)",
+   "Centre Display light intensity improvements",
+   "Screen cleaning mode introduced for infotainment system",
+   "General stability improvements for infotainment system",
+   "Seat and steering wheel functionality improvements",
+   "Hands-off detection improvements",
+   "Power-operated soft close tailgate with foot sensor sensitivity improvements",
+   "Bluetooth connection stability improvements",
+   "General stability improvements"
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P1.1.23",
+  "notes": [
+   "Stability improvements for occupant presence detection.",
+   "General stability improvements."
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P1.1.22",
+  "notes": [
+   "Note: The release of this software is only to improve the over the air functionality. The SW content in this update is identical to P1.1.21",
+   "Compatibility update"
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P1.1.21",
+  "notes": [
+   "Enabling digital key for Apple devices (Requires activation email).",
+   "Stability improvements for occupant presence detection.",
+   "Stability improvements for key recognition.",
+   "Sensitivity improvements for hands-on detection.",
+   "Auto calibration for TPMS functionality.",
+   "Improvements for cabin climate timer.",
+   "After the over-the-air (OTA) update, one or several windows might lose calibration. If this occurs, roll the affected window(s) all the way down and then all the way up and hold the window switch for one additional second. A manual initialization will be performed, and the calibration restored."
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P1.1.14",
+  "notes": [
+   "General stability improvements."
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P1.1.11",
+  "notes": [
+   "General stability improvements."
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P1.1.8",
+  "notes": [
+   "General stability improvements."
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P1.1.6",
+  "notes": [
+   "General stability improvements."
+  ],
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P1.0.3",
+  "notes": [
+   "General stability improvements."
+  ],
+  "first_seen": "2026-08-31"
+ }
+]
