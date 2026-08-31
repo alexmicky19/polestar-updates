@@ -1,34 +1,47 @@
 #!/usr/bin/env python3
 """
-Scrape Polestar software-update release notes from the official owner's manuals
-and regenerate index.html + per-model data.json / feed.xml.
+Scrape Polestar software-update release notes and regenerate index.html +
+per-model data.json / feed.xml.
 
-Data source: each model's manual page server-renders a Remix context blob that
-contains a `releaseNotes.content.body` structure. We fetch the HTML, isolate that
-object by balanced-brace scanning, walk it into a flat list of {version, notes[]},
-and splice the per-model results into index.html's embedded DATA object.
+Two data sources, chosen per model via its `source` field:
 
-Polestar does not publish release *dates* in the manual (verified for both P2 and
-P3), so we persist a stable per-version `first_seen` date instead.
+- "html" (Polestar 2): the manual page server-renders a Remix context blob that
+  contains a `releaseNotes.content.body` structure. We fetch the HTML, isolate that
+  object by balanced-brace scanning, and walk it into a flat list of {version,
+  notes[]}. P2 is not exposed by the JSON API, so it stays HTML-scraped.
+- "api" (Polestar 3): the manual pages are backed by a public, unauthenticated JSON
+  API. We resolve the en-GB release-notes document and read structured segments,
+  each carrying a `cmsSoftwareVersion` YYWW build-week code.
+
+Polestar publishes no true release *date* in either source. For API models we derive
+an approximate "released" date from the build-week code (Monday of that ISO week);
+for all models we also persist a stable per-version `first_seen` date as a fallback.
 
 No browser / heavy deps required — just urllib from the stdlib.
 """
 import json, re, sys, urllib.request, pathlib, html as _html, datetime
 
-# Each model: slug used in filenames/URLs, human label, and its manual URL.
-# Add a new model here (e.g. polestar-4) and everything else follows.
+# Each model: slug used in filenames/URLs, human label, data source, and its manual
+# URL. API models also carry a numeric `model_code`. Add a new model here (e.g.
+# polestar-4, model_code 814) and everything else follows.
 MODELS = [
     {
         "slug": "polestar-2",
         "label": "Polestar 2",
+        "source": "html",
         "manual_url": "https://www.polestar.com/uk/manual/polestar-2/2027/software-updates/",
     },
     {
         "slug": "polestar-3",
         "label": "Polestar 3",
+        "source": "api",
+        "model_code": "359",
         "manual_url": "https://www.polestar.com/uk/manual/polestar-3/2025/software-updates/",
     },
 ]
+
+# Public, unauthenticated Polestar release-notes JSON API (backs the manual pages).
+API_BASE = "https://support-car-content.polestar.volvo.care"
 
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
 
@@ -45,18 +58,10 @@ def fetch(url: str) -> str:
         return r.read().decode("utf-8", "replace")
 
 
-def extract_release_notes_object(page: str) -> dict:
-    """Find `"releaseNotes":{...}` and return it as a parsed dict via balanced braces."""
-    key = '"releaseNotes":'
-    i = page.find(key)
-    if i == -1:
-        raise SystemExit("could not find releaseNotes in page")
-    j = page.find("{", i)
-    # The blob lives inside the Remix context which is itself a JSON string, so the
-    # HTML we downloaded has it JSON-escaped once (\" and \\n). Scan on the raw text
-    # counting braces while respecting escaped quotes.
-    depth, k, in_str, esc = 0, j, False, False
-    while k < len(page):
+def _find_matching_brace(page: str, start: int) -> int:
+    """Index of the '}' matching the '{' at `start`, respecting quoted strings/escapes."""
+    depth, in_str, esc = 0, False, False
+    for k in range(start, len(page)):
         c = page[k]
         if in_str:
             if esc:
@@ -65,18 +70,28 @@ def extract_release_notes_object(page: str) -> dict:
                 esc = True
             elif c == '"':
                 in_str = False
-        else:
-            if c == '"':
-                in_str = True
-            elif c == "{":
-                depth += 1
-            elif c == "}":
-                depth -= 1
-                if depth == 0:
-                    raw = page[j:k + 1]
-                    return decode_escaped_json(raw)
-        k += 1
+        elif c == '"':
+            in_str = True
+        elif c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth == 0:
+                return k
     raise SystemExit("unbalanced braces scanning releaseNotes")
+
+
+def extract_release_notes_object(page: str) -> dict:
+    """Find `"releaseNotes":{...}` and return it as a parsed dict via balanced braces."""
+    i = page.find('"releaseNotes":')
+    if i == -1:
+        raise SystemExit("could not find releaseNotes in page")
+    # The blob lives inside the Remix context which is itself a JSON string, so the
+    # HTML we downloaded has it JSON-escaped once (\" and \\n). Scan on the raw text
+    # counting braces while respecting escaped quotes.
+    j = page.find("{", i)
+    end = _find_matching_brace(page, j)
+    return decode_escaped_json(page[j:end + 1])
 
 
 def decode_escaped_json(raw: str) -> dict:
@@ -91,47 +106,47 @@ def decode_escaped_json(raw: str) -> dict:
     return json.loads(unescaped)
 
 
+def _emit(notes: list, text) -> None:
+    """Append a stripped, non-empty string to notes; ignore anything else."""
+    if isinstance(text, str) and text.strip():
+        notes.append(text.strip())
+
+
+# Node types that open a sub-heading context for their children (title -> "### ").
+_SUB_TYPES = {"subSegment", "note"}
+# Node types whose children are either leaf text or nested content.
+_TEXT_TYPES = {"paragraph", "listItem"}
+
+
+def _walk(node, sub: bool, notes: list) -> None:
+    """Recursively flatten a release-notes node into `notes`."""
+    if isinstance(node, list):
+        for n in node:
+            _walk(n, sub, notes)
+        return
+    if not isinstance(node, dict):
+        _emit(notes, node)
+        return
+
+    t, ch = node.get("type"), node.get("children")
+    if t == "title":
+        # sub-segment / note title -> heading; top segment title handled by caller
+        if sub and isinstance(ch, str):
+            notes.append("### " + ch.strip())
+    elif t in _SUB_TYPES:
+        _walk(ch, True, notes)
+    elif t in _TEXT_TYPES and isinstance(ch, str):
+        _emit(notes, ch)
+    elif ch is not None:
+        # text type with nested children, list wrappers, or any other container
+        _walk(ch, sub, notes)
+
+
 def walk_notes(children) -> list:
     """Flatten a segment's children into a list of note strings.
     Sub-segment titles are prefixed with '### ' (the UI renders them as sub-headings)."""
-    notes = []
-
-    def rec(node, sub=False):
-        if isinstance(node, list):
-            for n in node:
-                rec(n, sub)
-            return
-        if not isinstance(node, dict):
-            if isinstance(node, str) and node.strip():
-                notes.append(node.strip())
-            return
-        t = node.get("type")
-        ch = node.get("children")
-        if t == "title":
-            # sub-segment / note title -> heading; top segment title handled by caller
-            if sub and isinstance(ch, str):
-                notes.append("### " + ch.strip())
-        elif t == "paragraph":
-            if isinstance(ch, str) and ch.strip():
-                notes.append(ch.strip())
-            else:
-                rec(ch, sub)
-        elif t == "subSegment":
-            rec(ch, True)
-        elif t in ("unorderedList", "orderedList"):
-            rec(ch, sub)
-        elif t == "listItem":
-            if isinstance(ch, str) and ch.strip():
-                notes.append(ch.strip())
-            else:
-                rec(ch, sub)
-        elif t == "note":
-            rec(ch, True)
-        else:
-            if ch is not None:
-                rec(ch, sub)
-
-    rec(children)
+    notes: list = []
+    _walk(children, False, notes)
     return notes
 
 
@@ -154,6 +169,114 @@ def parse_versions(rn: dict) -> list:
         rest = [n for n in children if not (isinstance(n, dict) and n.get("type") == "title" and n.get("children") == title)]
         notes = walk_notes(rest)
         versions.append({"version": ver, "notes": notes})
+    return versions
+
+
+def fetch_api_json(path_or_url: str) -> dict:
+    """GET JSON from the API. Accepts an absolute URL or an API path (with or
+    without a leading slash); follows redirects (the content host 303-redirects to
+    an internal mirror)."""
+    if path_or_url.startswith("http"):
+        url = path_or_url
+    else:
+        url = API_BASE + "/" + path_or_url.lstrip("/")
+    return json.loads(fetch(url))
+
+
+def week_code_to_date(code) -> str | None:
+    """Decode a Polestar YYWW build-week code to the Monday of that ISO week.
+
+    The code is `cmsSoftwareVersion` / `internalVersion`, e.g. 26380 -> year 2026,
+    week 38 -> 2026-09-14. Returns an ISO date string, or None for a missing/bad
+    code (there is no real release date in the source, so this is best-effort)."""
+    try:
+        n = int(code)
+    except (TypeError, ValueError):
+        return None
+    year = 2000 + n // 1000
+    week = (n % 1000) // 10
+    if not (1 <= week <= 53):
+        return None
+    try:
+        return datetime.date.fromisocalendar(year, week, 1).isoformat()
+    except ValueError:
+        return None
+
+
+def _seg_version(seg: dict) -> str | None:
+    """Resolve a segment's version. Prefer the explicit `softwareVersion`; fall back
+    to the title text ("Updates in Software Version PX.Y.Z"), which some segments use
+    instead of the field. Returns a normalised `PX.Y.Z` string or None."""
+    sw = seg.get("softwareVersion")
+    if sw:
+        return sw if sw.upper().startswith("P") else "P" + sw
+    children = seg.get("children")
+    if isinstance(children, list):
+        for n in children:
+            if isinstance(n, dict) and n.get("type") == "title" and isinstance(n.get("children"), str):
+                m = re.search(r"software version\s*(P?\d[\d.]*)", n["children"], flags=re.I)
+                if m:
+                    v = m.group(1)
+                    return v if v.upper().startswith("P") else "P" + v
+    return None
+
+
+def fetch_api_versions(model_code: str) -> list:
+    """Resolve a model's en-GB release-notes document from the JSON API and return
+    a list of {version, notes[], cms_version, released?}. Segments that share a
+    version (market/config splits) are merged. Ordering is left to the shared sort in
+    scrape_model. P2 is not in the API — only API models use this."""
+    manifest = fetch_api_json(f"/api/car-content/SOFTWARE_RELEASE_NOTES/{model_code}/UNTIL/99.0.0")
+    content = manifest.get("content", [])
+    if not content:
+        raise SystemExit(f"API manifest for model {model_code} had no content entries")
+    # Prefer the British-English document; fall back to the first available.
+    entry = next(
+        (c for c in content
+         if (c.get("locale") or c.get("language") or "").lower() in ("en-gb", "en_gb", "en")),
+        content[0])
+    rel = entry.get("relativeUrl")
+    if not rel:
+        raise SystemExit(f"API manifest entry for model {model_code} had no relativeUrl")
+
+    doc = fetch_api_json(rel)
+    body = doc.get("releaseNotesDocument", {}).get("body", [])
+    merged: dict = {}  # version -> {version, notes[], cms_version}
+    order: list = []   # preserve first-seen order of versions
+    for seg in body:
+        # Version segments are tagged release-notes; the version is in the field or title.
+        if seg.get("subtype") != "release-notes":
+            continue
+        version = _seg_version(seg)
+        if not version:
+            continue
+        children = seg.get("children")
+        # Drop the leading title node (same convention as the HTML parse_versions).
+        if isinstance(children, list):
+            rest = [n for n in children if not (isinstance(n, dict) and n.get("type") == "title")]
+        else:
+            rest = children
+        notes = walk_notes(rest)
+        cms = seg.get("cmsSoftwareVersion")
+        if version in merged:
+            # Same version split across segments: append new notes, keep the highest cms.
+            m = merged[version]
+            m["notes"].extend(n for n in notes if n not in m["notes"])
+            if cms and (m.get("cms_version") is None or cms > m["cms_version"]):
+                m["cms_version"] = cms
+        else:
+            merged[version] = {"version": version, "notes": list(notes), "cms_version": cms}
+            order.append(version)
+
+    versions = []
+    for ver in order:
+        v = merged[ver]
+        released = week_code_to_date(v.get("cms_version"))
+        if released:
+            v["released"] = released
+        versions.append(v)
+    if not versions:
+        raise SystemExit(f"API returned zero release-notes segments for model {model_code}")
     return versions
 
 
@@ -182,7 +305,8 @@ def rss_date(iso: str) -> str:
 
 
 def build_feed(model: dict, versions: list) -> str:
-    """One <item> per version, newest first, pubDate = first_seen date."""
+    """One <item> per version, newest first. pubDate is the derived release date
+    when available (API models), else the stable first_seen date."""
     def esc(s):
         return _html.escape(s, quote=True)
 
@@ -192,12 +316,13 @@ def build_feed(model: dict, versions: list) -> str:
         desc = "\n".join(("• " + n) if not n.startswith("### ") else ("\n" + n[4:] + ":")
                          for n in v["notes"]).strip()
         link = SITE_URL + "#" + esc(model["slug"] + "-" + v["version"].replace(".", "-"))
+        pub = v.get("released") or v["first_seen"]
         items.append(
             "    <item>\n"
             f"      <title>{esc(model['label'])} software {esc(v['version'])}</title>\n"
             f"      <link>{link}</link>\n"
             f"      <guid isPermaLink=\"false\">{esc(model['slug'])}-{esc(v['version'])}</guid>\n"
-            f"      <pubDate>{rss_date(v['first_seen'])}</pubDate>\n"
+            f"      <pubDate>{rss_date(pub)}</pubDate>\n"
             f"      <description>{esc(desc)}</description>\n"
             "    </item>"
         )
@@ -220,10 +345,16 @@ def build_feed(model: dict, versions: list) -> str:
 
 
 def scrape_model(model: dict, local: str | None) -> list:
-    """Return the sorted, first-seen-stamped version list for one model."""
-    page = pathlib.Path(local).read_text(encoding="utf-8", errors="replace") if local else fetch(model["manual_url"])
-    rn = extract_release_notes_object(page)
-    versions = parse_versions(rn)
+    """Return the sorted, first-seen-stamped version list for one model.
+
+    Dispatches on model['source']: HTML models parse the manual page's Remix blob;
+    API models read the JSON release-notes document and carry a derived release date."""
+    if model.get("source") == "api":
+        versions = fetch_api_versions(model["model_code"])
+    else:
+        page = pathlib.Path(local).read_text(encoding="utf-8", errors="replace") if local else fetch(model["manual_url"])
+        rn = extract_release_notes_object(page)
+        versions = parse_versions(rn)
     if not versions:
         raise SystemExit(f"parsed zero versions for {model['slug']} — aborting so we don't wipe good data")
 
@@ -267,7 +398,7 @@ def main():
     if n1 != 1 or n2 != 1:
         raise SystemExit("could not locate 'const DATA'/'const MODELS' in index.html")
     new_index = re.sub(r'const SCRAPED = "[^"]*";', f'const SCRAPED = "{today}";', new_index)
-    new_index = re.sub(r'Data captured [0-9]{4}-[0-9]{2}-[0-9]{2}', f'Data captured {today}', new_index)
+    new_index = re.sub(r'Data captured \d{4}-\d{2}-\d{2}', f'Data captured {today}', new_index)
 
     changed = new_index != index
     if changed:

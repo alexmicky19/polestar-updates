@@ -17,34 +17,47 @@ version and its official release notes, styled after the
 
 ## RSS feeds
 
-Each model has its own feed, linked from the page footer and `<head>`. Since
-Polestar doesn't publish release dates for these models (see below), each item's
-`pubDate` is the date the scraper **first observed** that version — persisted per
-version in `data/<model>.json` (`first_seen`) so dates stay stable across runs.
-All versions that existed when a feed was first generated share that initial date;
-anything released afterwards gets a genuine first-seen date when it appears.
+Each model has its own feed, linked from the page footer and `<head>`. An item's
+`pubDate` is the version's **released** date when one is available (Polestar 3 —
+derived from the build-week code, see below), otherwise the date the scraper
+**first observed** the version (`first_seen`, used for Polestar 2). Both are
+persisted per version in `data/<model>.json` so dates stay stable across runs.
 
-## Source & the "no dates" caveat
+## Sources & how dates are derived
 
-Data is taken from the Polestar owner's manuals — Software updates (UK view, which
-lists all historical versions):
+Polestar publishes **no explicit release date** for software in either source, so
+the tracker uses the best signal each source offers:
 
-- [Polestar 2](https://www.polestar.com/uk/manual/polestar-2/2027/software-updates/) (model-year 2027 view)
-- [Polestar 3](https://www.polestar.com/uk/manual/polestar-3/2025/software-updates/) (model-year 2025 view)
+- **Polestar 2** — scraped from the owner's manual
+  ([Software updates, UK view](https://www.polestar.com/uk/manual/polestar-2/2027/software-updates/)),
+  which embeds the release notes as a Remix context blob
+  (`releaseNotes.content.body`). Polestar 2 is **not** exposed by the JSON API, so
+  it stays HTML-scraped and its dates show as **"First tracked"** — when this
+  tracker first saw the version.
+- **Polestar 3** — read from Polestar's public, unauthenticated release-notes JSON
+  API (`https://support-car-content.polestar.volvo.care`, the source behind the
+  [Polestar 3 manual page](https://www.polestar.com/uk/manual/polestar-3/2025/software-updates/)).
+  Each version carries a `cmsSoftwareVersion` **build-week code** in `YYWW` form
+  (e.g. `26380` → 2026, ISO week 38). The tracker decodes that to the **Monday of
+  that ISO week** and shows it as **"Released ~"** (approximate — the code can lead
+  the actual rollout, which still varies by market and model year). Versions with no
+  usable code fall back to "First tracked".
 
-Both manuals embed the release notes as a Remix context blob
-(`releaseNotes.content.body`) but **do not include release dates** — only version
-numbers and notes. (An earlier version of this README claimed newer models are served
-through a dated `support-car-content` API; that was not confirmed for the manual
-source and is not used here.) So this tracker shows the full changelog and version
-history, but cannot compute "days between releases" or predict the next update.
+The API has no true date field — the week code is the closest available signal, so
+the tracker cannot compute exact "days between releases" or predict the next update.
 
 ## Adding another model
 
-Everything is driven by the `MODELS` list at the top of `scripts/scrape.py` — each
-entry is `{slug, label, manual_url}`. Add a new model (e.g. `polestar-4`) there and
-the scraper produces `data/polestar-4.json` + `feed-polestar-4.xml`, the page grows a
-new toggle tab, and the notifier workflow covers it automatically.
+Everything is driven by the `MODELS` list at the top of `scripts/scrape.py`. Each
+entry has a `slug`, `label`, `manual_url`, and a `source`:
+
+- `"source": "html"` — HTML-scrape the `manual_url` (like Polestar 2).
+- `"source": "api"` — read the JSON API; also set `"model_code"` (Polestar 3 = 359,
+  Polestar 4 = 814, Polestar 4 SUV = 815, Polestar 5 = 824).
+
+Add a new model there and the scraper produces `data/<slug>.json` +
+`feed-<slug>.xml`, the page grows a new toggle tab, and the notifier workflow covers
+it automatically.
 
 ## Updating the data
 
