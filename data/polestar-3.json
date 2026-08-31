@@ -4,6 +4,8 @@
   "notes": [
    "This software update provides general improvements and bug fixes."
   ],
+  "cms_version": 26380,
+  "released": "2026-09-14",
   "first_seen": "2026-08-31"
  },
  {
@@ -31,6 +33,7 @@
    "### Additional improvements",
    "Improvements to Exit Assist, now including a temporary prevention of opening the door – in addition to an audible and visual warning – if pedestrians, bicycles, or other vehicles approaching from the rear are detected. A double pull of the door latch will override the temporary hold.",
    "Previously, Exit Assist only provided an audible and visual warning when detecting objects approaching from the rear.",
+   "Improvements to Connected Safety, with the function now extended to provide warnings for large animals and roadworks ahead.",
    "Improvements to Apple CarPlay, now supporting Dolby Atmos, delivering a more immersive and directional sound experience when supported content is played.",
    "Improvements to the foot-operated tailgate, including overall robustness and a longer activation time with extended audible feedback when closing the tailgate.",
    "Improvements to rear wiper behaviour, including a shorter wiper cleaning interval reduced from 10 to 8 seconds, and automatic activation of the rear wiper when reversing if the front wipers are already active.",
@@ -41,6 +44,8 @@
    "Bug fix for when the interior illumination brightness and theme did not respond correctly.",
    "Bug fix for when the alarm could be triggered when the car was unlocked and opened via the passenger door."
   ],
+  "cms_version": 26340,
+  "released": "2026-08-17",
   "first_seen": "2026-08-31"
  },
  {
@@ -66,6 +71,7 @@
    "### Additional improvements",
    "Improvements to Exit Assist, now including a temporary prevention of opening the door – in addition to an audible and visual warning – if pedestrians, bicycles, or other vehicles approaching from the rear are detected. A double pull of the door latch will override the temporary hold.",
    "Previously, Exit Assist only provided an audible and visual warning when detecting objects approaching from the rear.",
+   "Improvements to Connected Safety, with the function now extended to provide warnings for large animals and roadworks ahead",
    "Improvements to Apple CarPlay, now supporting Dolby Atmos, delivering a more immersive and directional sound experience when supported content is played.",
    "Improvements to the foot-operated tailgate, including overall robustness and a longer activation time with extended audible feedback when closing the tailgate.",
    "Improvements to rear wiper behaviour, including a shorter wiper cleaning interval reduced from 10 to 8 seconds, and automatic activation of the rear wiper when reversing if the front wipers are already active.",
@@ -76,6 +82,8 @@
    "Bug fix for when the interior illumination brightness and theme did not respond correctly.",
    "Bug fix for when the alarm could be triggered when the car was unlocked and opened via the passenger door."
   ],
+  "cms_version": 26170,
+  "released": "2026-04-20",
   "first_seen": "2026-08-31"
  },
  {
@@ -83,6 +91,8 @@
   "notes": [
    "This software update provides general improvements and compatibility updates. It includes the software content released in all previous updates."
   ],
+  "cms_version": 26150,
+  "released": "2026-04-06",
   "first_seen": "2026-08-31"
  },
  {
@@ -90,6 +100,8 @@
   "notes": [
    "This software update provides general improvements and compatibility updates. It includes the software content released in all previous updates."
   ],
+  "cms_version": 26110,
+  "released": "2026-03-09",
   "first_seen": "2026-08-31"
  },
  {
@@ -97,15 +109,23 @@
   "notes": [
    "This software update provides general improvements and compatibility updates. It includes the software content released in 2.1.22."
   ],
+  "cms_version": 26090,
+  "released": "2026-02-23",
   "first_seen": "2026-08-31"
  },
  {
   "version": "P2.1.22",
   "notes": [
    "This software update provides general stability improvements to all Polestar 3 vehicles upgraded with the new core computer.",
+   "HomeLink is introduced. The HomeLink app allows the user to pair and control gate openers, such as garage doors, produced by HomeLink",
    "As part of Pilot assist and Adaptive Cruise control, Adapt to speed limit is introduced. The Adapt to speed limit is a new function that allows the driver to accept or reject offers to adapt the set speed limit according to the updated roads’ speed limits",
    "The driver can enable Adapt to speed limit in the driver settings menu",
    "This functionality requires the vehicle to have Road Sign Information activated",
+   "Connected safety introduced, allowing information sharing between vehicles via a cloud service. The function is intended to make a driver aware there may be a potential traffic situation ahead. Connected Safety can inform the driver when the following hazards are detected beyond the visible horizon:",
+   "This is not the same functionality as provided via Google maps.",
+   "Accident ahead",
+   "Slippery road conditions",
+   "Vehicles with hazard lights activated",
    "Time gap setting when using Adaptive cruise control or Pilot assist is introduced. The driver can select between three distance levels to vehicles ahead, in the centre display, improving comfort when using Adaptive cruise control or Pilot Assist.",
    "Automatic folding and unfolding of exterior mirrors when locking and unlocking the car is introduced",
    "Previously, it was only possible to manually fold and unfold the mirrors in settings",
@@ -116,6 +136,9 @@
    "The driver and front seat passenger can speak naturally as their conversation is amplified through the car’s speakers, which adjusts the output volume at high speeds or with music playing",
    "The function is available in three settings (low, medium and high) which adapt the overall volume for all needs, including for hearing impairments",
    "In cars equipped with Bowers & Wilkins for Polestar, additional rear microphones enable easy communication between front and rear seats improving this feature further",
+   "Bi-directional charging, V2H, for customers in California is introduced",
+   "This charging solution uses direct current (DC) and enables V2H (Vehicle to home) functionality for Polestar 3 on the 400V electrical architecture",
+   "The feature requires a bi-directional compatible DC-wall box available for Polestar 3 provided by Dcbel",
    "### Additional improvements",
    "Improvements to high-voltage battery consumption when vehicle not in use, including prevention of battery consumption while keeping the car core system active over time while parked",
    "Improvements to the centre display, including the possibility for users to re-order downloaded apps in the app centre. To do this, press and hold an app icon, and then drag it to the place you desire",
@@ -139,6 +162,17 @@
    "Bug fix for when the interior lighting theme, white or gold, intermittently didn’t allow switching between the colours",
    "Bug fix for when Google Maps would start in dark mode during daytime"
   ],
+  "cms_version": 26060,
+  "released": "2026-02-02",
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P1.4.15",
+  "notes": [
+   "In line with our commitment to continuous improvement, this extra release includes refinements aimed at further improving the AC charging experience. While users may not notice any changes, these updates are part of our proactive approach to delivering key improvements as soon as they are available."
+  ],
+  "cms_version": 25440,
+  "released": "2025-10-27",
   "first_seen": "2026-08-31"
  },
  {
@@ -151,21 +185,18 @@
    "Stability of internet connectivity has been improved, along with enhancements to how the vehicle manages temporary connection loss.",
    "The GPS reliability has been improved to help prevent signal loss and drifting on the map.",
    "Improvements to Digital Key unlocking functionality when approaching the car.",
+   "HD Radio improvements.",
    "Apple CarPlay connectivity improved to more reliably reconnect during the next driving cycle. Previously, Apple CarPlay would not always reconnect as expected."
   ],
-  "first_seen": "2026-08-31"
- },
- {
-  "version": "P1.3.18",
-  "notes": [
-   "Digital Key lock and unlock functionality improved",
-   "False occupant presence reminder sensitivity improvements"
-  ],
+  "cms_version": 25360,
+  "released": "2025-09-01",
   "first_seen": "2026-08-31"
  },
  {
   "version": "P1.3.17",
   "notes": [
+   "Digital Key lock and unlock functionality improved",
+   "False occupant presence reminder sensitivity improvements",
    "Abbey Road Studios Mode introduced. It offers a listening experience inspired by the world-famous recording studio in London. With this audio mode you can choose between four new sound presets or adjust the sound spectrum as if you are the producer in the recording room and freely move around in it. (Only applicable with Bowers & Wilkins audio system)",
    "Smart schedule for charging introduced.",
    "Set a departure time at a certain location and the vehicle will use a smart schedule to ensure its charged and ready by the desired time of departure. The vehicle delays the charging start to protect your battery and reach the desired state of charge as late as possible prior to departure.",
@@ -178,6 +209,7 @@
    "Change in logic of parking assist camera to always show reverse camera view when vehicle is placed in reverse. Cars with Split screen view with 360-camera and rear-view camera will show the split screen when the vehicle is placed in reverse.",
    "Bug fix for issue where the connection between a driver profile and a connected key would disappear after the vehicle has been parked for extended periods. . All key connections will now remain until they are manually removed from the driver profile.",
    "Adaptive High beam improved for a quicker response time after a meeting scenario has occurred.",
+   "Fix for issue with Fahrenheit temperature reverting back to 62. (US market only)",
    "NFC reader in door handle improved. By placing your fingers under the door handle, a reset will now be triggered which will re-enable the NFC-readers",
    "Additional information now added to the HUD (Head-Up Display)",
    "ACC/Pilot assist and Set speed is now shown in the HUD",
@@ -192,8 +224,20 @@
    "Climate setting improvement to issue with settings not being available in the centre display",
    "Improved sound when phone is connected via Bluetooth",
    "Stability improvements to in-car connectivity in car",
-   "Infotainment system stability improvements"
+   "Infotainment system stability improvements",
+   "Stability improvements for AC charging. (US market only)"
   ],
+  "cms_version": 25260,
+  "released": "2025-06-23",
+  "first_seen": "2026-08-31"
+ },
+ {
+  "version": "P1.2.16",
+  "notes": [
+   "General stability improvements."
+  ],
+  "cms_version": 25170,
+  "released": "2025-04-21",
   "first_seen": "2026-08-31"
  },
  {
@@ -212,6 +256,8 @@
    "The car will always choose automatic mode as default between drive cycles. This change however allows you to select and change the sensitivity of the rain sensor used in automatic mode and will now be saved between drive cycles.",
    "Digital key and key fob profile connection improvements"
   ],
+  "cms_version": 25140,
+  "released": "2025-03-31",
   "first_seen": "2026-08-31"
  },
  {
@@ -236,6 +282,8 @@
    "Bluetooth connection stability improvements",
    "General stability improvements"
   ],
+  "cms_version": 25040,
+  "released": "2025-01-20",
   "first_seen": "2026-08-31"
  },
  {
@@ -244,6 +292,8 @@
    "Stability improvements for occupant presence detection.",
    "General stability improvements."
   ],
+  "cms_version": 24500,
+  "released": "2024-12-09",
   "first_seen": "2026-08-31"
  },
  {
@@ -252,6 +302,8 @@
    "Note: The release of this software is only to improve the over the air functionality. The SW content in this update is identical to P1.1.21",
    "Compatibility update"
   ],
+  "cms_version": 24480,
+  "released": "2024-11-25",
   "first_seen": "2026-08-31"
  },
  {
@@ -265,6 +317,8 @@
    "Improvements for cabin climate timer.",
    "After the over-the-air (OTA) update, one or several windows might lose calibration. If this occurs, roll the affected window(s) all the way down and then all the way up and hold the window switch for one additional second. A manual initialization will be performed, and the calibration restored."
   ],
+  "cms_version": 24460,
+  "released": "2024-11-11",
   "first_seen": "2026-08-31"
  },
  {
@@ -272,6 +326,8 @@
   "notes": [
    "General stability improvements."
   ],
+  "cms_version": 24420,
+  "released": "2024-10-14",
   "first_seen": "2026-08-31"
  },
  {
@@ -279,6 +335,8 @@
   "notes": [
    "General stability improvements."
   ],
+  "cms_version": 24390,
+  "released": "2024-09-23",
   "first_seen": "2026-08-31"
  },
  {
@@ -286,6 +344,8 @@
   "notes": [
    "General stability improvements."
   ],
+  "cms_version": 24370,
+  "released": "2024-09-09",
   "first_seen": "2026-08-31"
  },
  {
@@ -293,13 +353,17 @@
   "notes": [
    "General stability improvements."
   ],
+  "cms_version": 24360,
+  "released": "2024-09-02",
   "first_seen": "2026-08-31"
  },
  {
-  "version": "P1.0.3",
+  "version": "P1.0.4",
   "notes": [
    "General stability improvements."
   ],
+  "cms_version": 24250,
+  "released": "2024-06-17",
   "first_seen": "2026-08-31"
  }
 ]
