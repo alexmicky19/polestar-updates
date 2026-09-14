@@ -18,9 +18,9 @@ jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -68,7 +68,9 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           # Human-readable commit summary of the latest version per model.
-          summary=$(python3 -c "import json,glob,os; parts=[]; [parts.append(os.path.basename(f)[:-5]+' '+json.load(open(f))[0]['version']) for f in sorted(glob.glob('data/*.json'))]; print(', '.join(parts))")
+          # Only the per-model version lists (data/<slug>.json) — skip the
+          # data/*.meta.json sidecars, which are objects, not version arrays.
+          summary=$(python3 -c "import json,glob,os; parts=[]; [parts.append(os.path.basename(f)[:-5]+' '+json.load(open(f))[0]['version']) for f in sorted(glob.glob('data/*.json')) if not f.endswith('.meta.json')]; print(', '.join(parts))")
           git commit -m "chore: update Polestar software data (${summary})"
           git push
 
@@ -82,7 +84,7 @@ jobs:
 
       - name: Open an issue per new version
         if: steps.commit.outputs.changed == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
