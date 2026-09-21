@@ -1,5 +1,14 @@
 [
  {
+  "version": "P3.0.34",
+  "notes": [
+   "This software update is a compatibility update for Polestar 3."
+  ],
+  "cms_version": 26400,
+  "released": "2026-09-28",
+  "first_seen": "2026-09-21"
+ },
+ {
   "version": "P3.0.33",
   "notes": [
    "This software update provides general improvements and bug fixes."

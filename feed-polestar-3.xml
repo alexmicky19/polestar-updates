@@ -6,7 +6,14 @@
     <atom:link href="https://alexmicky19.github.io/polestar-updates/feed-polestar-3.xml" rel="self" type="application/rss+xml"/>
     <description>New Polestar 3 software versions and their release notes, sourced from Polestar's owner's manual. Unofficial.</description>
     <language>en-GB</language>
-    <lastBuildDate>Mon, 14 Sep 2026 14:17:28 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 21 Sep 2026 14:08:32 +0000</lastBuildDate>
+    <item>
+      <title>Polestar 3 software P3.0.34</title>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P3-0-34</link>
+      <guid isPermaLink="false">polestar-3-P3.0.34</guid>
+      <pubDate>Mon, 28 Sep 2026 00:00:00 +0000</pubDate>
+      <description>• This software update is a compatibility update for Polestar 3.</description>
+    </item>
     <item>
       <title>Polestar 3 software P3.0.33</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P3-0-33</link>
