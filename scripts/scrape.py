@@ -11,11 +11,13 @@ Two data sources, chosen per model via its `source` field:
   notes[]}. P2 is not exposed by the JSON API, so it stays HTML-scraped.
 - "api" (Polestar 3): the manual pages are backed by a public, unauthenticated JSON
   API. We resolve the en-GB release-notes document and read structured segments,
-  each carrying a `cmsSoftwareVersion` YYWW build-week code.
+  each carrying a `cmsSoftwareVersion` YYWW build-week code (shown for traceability).
 
-Polestar publishes no true release *date* in either source. For API models we derive
-an approximate "released" date from the build-week code (Monday of that ISO week);
-for all models we also persist a stable per-version `first_seen` date as a fallback.
+Polestar publishes no true release *date* in either source. The `cmsSoftwareVersion`
+build-week code is *not* a release date — it's when the build was registered, and it
+leads the actual public rollout by 1-3 weeks (so trusting it produces future-dated,
+not-yet-visible "releases"). We therefore date every version by `first_seen` — the
+date this tracker first observed it — the same approach as the Polestar 4 tracker.
 
 No browser / heavy deps required — just urllib from the stdlib.
 """
@@ -187,26 +189,6 @@ def fetch_api_json(path_or_url: str) -> dict:
     return json.loads(fetch(url))
 
 
-def week_code_to_date(code) -> str | None:
-    """Decode a Polestar YYWW build-week code to the Monday of that ISO week.
-
-    The code is `cmsSoftwareVersion` / `internalVersion`, e.g. 26380 -> year 2026,
-    week 38 -> 2026-09-14. Returns an ISO date string, or None for a missing/bad
-    code (there is no real release date in the source, so this is best-effort)."""
-    try:
-        n = int(code)
-    except (TypeError, ValueError):
-        return None
-    year = 2000 + n // 1000
-    week = (n % 1000) // 10
-    if not (1 <= week <= 53):
-        return None
-    try:
-        return datetime.date.fromisocalendar(year, week, 1).isoformat()
-    except ValueError:
-        return None
-
-
 def _seg_version(seg: dict) -> str | None:
     """Resolve a segment's version. Prefer the explicit `softwareVersion`; fall back
     to the title text ("Updates in Software Version PX.Y.Z"), which some segments use
@@ -228,11 +210,12 @@ def _seg_version(seg: dict) -> str | None:
 def fetch_api_versions(model_code: str):
     """Resolve a model's en-GB release-notes document from the JSON API and return
     ``(versions, space_software_version)`` where versions is a list of
-    {version, notes[], cms_version, released?}. Segments that share a version
+    {version, notes[], cms_version}. Segments that share a version
     (market/config splits) are merged. Ordering is left to the shared sort in
     scrape_model. ``space_software_version`` is the manifest's newest published
     build code (the "in the pipeline" threshold), or None. P2 is not in the API —
-    only API models use this."""
+    only API models use this. The `cms_version` build-week code is kept for
+    traceability only; dates come from `first_seen` (see module docstring)."""
     manifest = fetch_api_json(f"/api/car-content/SOFTWARE_RELEASE_NOTES/{model_code}/UNTIL/99.0.0")
     content = manifest.get("content", [])
     if not content:
@@ -277,11 +260,7 @@ def fetch_api_versions(model_code: str):
 
     versions = []
     for ver in order:
-        v = merged[ver]
-        released = week_code_to_date(v.get("cms_version"))
-        if released:
-            v["released"] = released
-        versions.append(v)
+        versions.append(merged[ver])
     if not versions:
         raise SystemExit(f"API returned zero release-notes segments for model {model_code}")
     # The newest published build code — anything registered above this is "upcoming".
@@ -361,8 +340,8 @@ def rss_date(iso: str) -> str:
 
 
 def build_feed(model: dict, versions: list) -> str:
-    """One <item> per version, newest first. pubDate is the derived release date
-    when available (API models), else the stable first_seen date."""
+    """One <item> per version, newest first. pubDate is the version's stable
+    first_seen date (when this tracker first observed it)."""
     def esc(s):
         return _html.escape(s, quote=True)
 
@@ -372,7 +351,7 @@ def build_feed(model: dict, versions: list) -> str:
         desc = "\n".join(("• " + n) if not n.startswith("### ") else ("\n" + n[4:] + ":")
                          for n in v["notes"]).strip()
         link = SITE_URL + "#" + esc(model["slug"] + "-" + v["version"].replace(".", "-"))
-        pub = v.get("released") or v["first_seen"]
+        pub = v["first_seen"]
         items.append(
             "    <item>\n"
             f"      <title>{esc(model['label'])} software {esc(v['version'])}</title>\n"

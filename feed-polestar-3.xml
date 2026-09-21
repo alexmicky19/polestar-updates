@@ -6,26 +6,26 @@
     <atom:link href="https://alexmicky19.github.io/polestar-updates/feed-polestar-3.xml" rel="self" type="application/rss+xml"/>
     <description>New Polestar 3 software versions and their release notes, sourced from Polestar's owner's manual. Unofficial.</description>
     <language>en-GB</language>
-    <lastBuildDate>Mon, 21 Sep 2026 14:08:32 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 21 Sep 2026 14:32:21 +0000</lastBuildDate>
     <item>
       <title>Polestar 3 software P3.0.34</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P3-0-34</link>
       <guid isPermaLink="false">polestar-3-P3.0.34</guid>
-      <pubDate>Mon, 28 Sep 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 21 Sep 2026 00:00:00 +0000</pubDate>
       <description>• This software update is a compatibility update for Polestar 3.</description>
     </item>
     <item>
       <title>Polestar 3 software P3.0.33</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P3-0-33</link>
       <guid isPermaLink="false">polestar-3-P3.0.33</guid>
-      <pubDate>Mon, 14 Sep 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• This software update provides general improvements and bug fixes.</description>
     </item>
     <item>
       <title>Polestar 3 software P3.0.28</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P3-0-28</link>
       <guid isPermaLink="false">polestar-3-P3.0.28</guid>
-      <pubDate>Mon, 17 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• This software update is available for all Polestar 3 vehicles that have been upgraded with the new core computer.
 • The operating system, Android Automotive OS, is upgraded to Android 15. The upgrade includes overall infotainment improvements and performance, as well as increased availability to more apps through Google Play Store. Audio from video apps can now be played while driving and controlled directly via the media widget.
 • Additional functionality for the steering wheel buttons is introduced. The new functionality includes:
@@ -65,7 +65,7 @@ Bug fixes:
       <title>Polestar 3 software P3.0.26</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P3-0-26</link>
       <guid isPermaLink="false">polestar-3-P3.0.26</guid>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• This software update is available for all Polestar 3 vehicles that have been upgraded with the new core computer.
 • The operating system, Android Automotive OS, is upgraded to Android 15. The upgrade includes overall infotainment improvements and performance, as well as increased availability to more apps through Google Play Store. Audio from video apps can now be played while driving and controlled directly via the media widget.
 • Additional functionality for the steering wheel buttons is introduced. The new functionality includes:
@@ -103,28 +103,28 @@ Bug fixes:
       <title>Polestar 3 software P2.1.26</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P2-1-26</link>
       <guid isPermaLink="false">polestar-3-P2.1.26</guid>
-      <pubDate>Mon, 06 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• This software update provides general improvements and compatibility updates. It includes the software content released in all previous updates.</description>
     </item>
     <item>
       <title>Polestar 3 software P2.1.25</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P2-1-25</link>
       <guid isPermaLink="false">polestar-3-P2.1.25</guid>
-      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• This software update provides general improvements and compatibility updates. It includes the software content released in all previous updates.</description>
     </item>
     <item>
       <title>Polestar 3 software P2.1.24</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P2-1-24</link>
       <guid isPermaLink="false">polestar-3-P2.1.24</guid>
-      <pubDate>Mon, 23 Feb 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• This software update provides general improvements and compatibility updates. It includes the software content released in 2.1.22.</description>
     </item>
     <item>
       <title>Polestar 3 software P2.1.22</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P2-1-22</link>
       <guid isPermaLink="false">polestar-3-P2.1.22</guid>
-      <pubDate>Mon, 02 Feb 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• This software update provides general stability improvements to all Polestar 3 vehicles upgraded with the new core computer.
 • HomeLink is introduced. The HomeLink app allows the user to pair and control gate openers, such as garage doors, produced by HomeLink
 • As part of Pilot assist and Adaptive Cruise control, Adapt to speed limit is introduced. The Adapt to speed limit is a new function that allows the driver to accept or reject offers to adapt the set speed limit according to the updated roads’ speed limits
@@ -177,14 +177,14 @@ Bug fixes:
       <title>Polestar 3 software P1.4.15</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-4-15</link>
       <guid isPermaLink="false">polestar-3-P1.4.15</guid>
-      <pubDate>Mon, 27 Oct 2025 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• In line with our commitment to continuous improvement, this extra release includes refinements aimed at further improving the AC charging experience. While users may not notice any changes, these updates are part of our proactive approach to delivering key improvements as soon as they are available.</description>
     </item>
     <item>
       <title>Polestar 3 software P1.4.12</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-4-12</link>
       <guid isPermaLink="false">polestar-3-P1.4.12</guid>
-      <pubDate>Mon, 01 Sep 2025 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• Fix for seat position so that it is now correctly connected to the selected driver profile.
 • Solution for performance issues related to third-party HD Video streaming apps.
 • Audio and Abbey Road Studios Mode settings are fixed to avoid issues with missing content, such as missing back button in the center display.
@@ -199,7 +199,7 @@ Bug fixes:
       <title>Polestar 3 software P1.3.17</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-3-17</link>
       <guid isPermaLink="false">polestar-3-P1.3.17</guid>
-      <pubDate>Mon, 23 Jun 2025 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• Digital Key lock and unlock functionality improved
 • False occupant presence reminder sensitivity improvements
 • Abbey Road Studios Mode introduced. It offers a listening experience inspired by the world-famous recording studio in London. With this audio mode you can choose between four new sound presets or adjust the sound spectrum as if you are the producer in the recording room and freely move around in it. (Only applicable with Bowers &amp; Wilkins audio system)
@@ -237,14 +237,14 @@ Additional improvements:
       <title>Polestar 3 software P1.2.16</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-2-16</link>
       <guid isPermaLink="false">polestar-3-P1.2.16</guid>
-      <pubDate>Mon, 21 Apr 2025 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• General stability improvements.</description>
     </item>
     <item>
       <title>Polestar 3 software P1.2.15</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-2-15</link>
       <guid isPermaLink="false">polestar-3-P1.2.15</guid>
-      <pubDate>Mon, 31 Mar 2025 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• Power-operated soft close tailgate with foot sensor operation improved to allow the tailgate to trigger after first button press or foot kick
 • Alarm sensor logic changed so the alarm sensor does not flash during driving.
 • Centre display light intensity improvements that prevent the screen from flickering when switching between day and night mode.
@@ -262,7 +262,7 @@ Additional improvements:
       <title>Polestar 3 software P1.2.6</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-2-6</link>
       <guid isPermaLink="false">polestar-3-P1.2.6</guid>
-      <pubDate>Mon, 20 Jan 2025 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• Walk-away locking introduced
 • Wireless Apple CarPlay introduced
 • Digital key for Android devices introduced (check the compatibility of your device on the phone manufacturer website):
@@ -286,7 +286,7 @@ Additional improvements:
       <title>Polestar 3 software P1.1.23</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-1-23</link>
       <guid isPermaLink="false">polestar-3-P1.1.23</guid>
-      <pubDate>Mon, 09 Dec 2024 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• Stability improvements for occupant presence detection.
 • General stability improvements.</description>
     </item>
@@ -294,7 +294,7 @@ Additional improvements:
       <title>Polestar 3 software P1.1.22</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-1-22</link>
       <guid isPermaLink="false">polestar-3-P1.1.22</guid>
-      <pubDate>Mon, 25 Nov 2024 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• Note: The release of this software is only to improve the over the air functionality. The SW content in this update is identical to P1.1.21
 • Compatibility update</description>
     </item>
@@ -302,7 +302,7 @@ Additional improvements:
       <title>Polestar 3 software P1.1.21</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-1-21</link>
       <guid isPermaLink="false">polestar-3-P1.1.21</guid>
-      <pubDate>Mon, 11 Nov 2024 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• Enabling digital key for Apple devices (Requires activation email).
 • Stability improvements for occupant presence detection.
 • Stability improvements for key recognition.
@@ -315,35 +315,35 @@ Additional improvements:
       <title>Polestar 3 software P1.1.14</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-1-14</link>
       <guid isPermaLink="false">polestar-3-P1.1.14</guid>
-      <pubDate>Mon, 14 Oct 2024 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• General stability improvements.</description>
     </item>
     <item>
       <title>Polestar 3 software P1.1.11</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-1-11</link>
       <guid isPermaLink="false">polestar-3-P1.1.11</guid>
-      <pubDate>Mon, 23 Sep 2024 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• General stability improvements.</description>
     </item>
     <item>
       <title>Polestar 3 software P1.1.8</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-1-8</link>
       <guid isPermaLink="false">polestar-3-P1.1.8</guid>
-      <pubDate>Mon, 09 Sep 2024 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• General stability improvements.</description>
     </item>
     <item>
       <title>Polestar 3 software P1.1.6</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-1-6</link>
       <guid isPermaLink="false">polestar-3-P1.1.6</guid>
-      <pubDate>Mon, 02 Sep 2024 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• General stability improvements.</description>
     </item>
     <item>
       <title>Polestar 3 software P1.0.4</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-0-4</link>
       <guid isPermaLink="false">polestar-3-P1.0.4</guid>
-      <pubDate>Mon, 17 Jun 2024 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• General stability improvements.</description>
     </item>
   </channel>
