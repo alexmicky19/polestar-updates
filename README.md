@@ -18,33 +18,30 @@ version and its official release notes, styled after the
 ## RSS feeds
 
 Each model has its own feed, linked from the page footer and `<head>`. An item's
-`pubDate` is the version's **released** date when one is available (Polestar 3 —
-derived from the build-week code, see below), otherwise the date the scraper
-**first observed** the version (`first_seen`, used for Polestar 2). Both are
+`pubDate` is the date the scraper **first observed** the version (`first_seen`),
 persisted per version in `data/<model>.json` so dates stay stable across runs.
 
 ## Sources & how dates are derived
 
 Polestar publishes **no explicit release date** for software in either source, so
-the tracker uses the best signal each source offers:
+every version is dated by **"First tracked"** — when this tracker first observed it.
 
 - **Polestar 2** — scraped from the owner's manual
   ([Software updates, UK view](https://www.polestar.com/uk/manual/polestar-2/2027/software-updates/)),
   which embeds the release notes as a Remix context blob
   (`releaseNotes.content.body`). Polestar 2 is **not** exposed by the JSON API, so
-  it stays HTML-scraped and its dates show as **"First tracked"** — when this
-  tracker first saw the version.
+  it stays HTML-scraped.
 - **Polestar 3** — read from Polestar's public, unauthenticated release-notes JSON
   API (`https://support-car-content.polestar.volvo.care`, the source behind the
   [Polestar 3 manual page](https://www.polestar.com/uk/manual/polestar-3/2025/software-updates/)).
   Each version carries a `cmsSoftwareVersion` **build-week code** in `YYWW` form
-  (e.g. `26380` → 2026, ISO week 38). The tracker decodes that to the **Monday of
-  that ISO week** and shows it as **"Released ~"** (approximate — the code can lead
-  the actual rollout, which still varies by market and model year). Versions with no
-  usable code fall back to "First tracked".
+  (e.g. `26380` → 2026, ISO week 38). This is when the build was **registered**, not
+  released — it leads the public rollout by a week or two — so it is shown for
+  **traceability only** and is **not** used as a release date.
 
-The API has no true date field — the week code is the closest available signal, so
-every derived date is approximate.
+Neither source has a true release-date field, so `first_seen` is the honest signal —
+the same approach as the reference
+[Polestar 4 tracker](https://jaybizzle.github.io/polestar4-updates).
 
 ### Build codes, cadence & forecast (Polestar 3 only)
 
@@ -55,14 +52,13 @@ version list, so its rows and banner are unchanged.
 
 - **Build code on every version** — the raw `YYWW` code shown for traceability, e.g.
   `build 26380 · 2026 wk 38`.
-- **Days between versions** — the gap in days from the previous (next-older) dated
-  release, derived from the build-week dates (e.g. `· 28 days after previous`).
+- **Days between versions** — the gap in days from the previous (next-older) observed
+  release (e.g. `· 28 days after previous`).
 - **Predicted next update** — the banner replaces "Latest released version" with a
-  statistical estimate: the **median** of the gaps between past dated releases, added
+  statistical estimate: the **median** of the gaps between past observed releases, added
   to the latest release date, with a likely window (the 25th–75th-percentile gap, the
   middle 50% of history) and an overdue / due-in badge. It is an estimate from past
-  cadence, not an announced date. When the latest build's week has not yet arrived,
-  the banner says so rather than reporting a negative "days ago".
+  cadence, not an announced date.
 - **In the pipeline** — builds Polestar has *registered* in `available-car-models`
   but not yet published notes for (`internalVersion` greater than the manifest's
   `spaceSoftwareVersion`). This section is hidden when empty — which is the case

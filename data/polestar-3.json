@@ -5,7 +5,6 @@
    "This software update is a compatibility update for Polestar 3."
   ],
   "cms_version": 26400,
-  "released": "2026-09-28",
   "first_seen": "2026-09-21"
  },
  {
@@ -14,7 +13,6 @@
    "This software update provides general improvements and bug fixes."
   ],
   "cms_version": 26380,
-  "released": "2026-09-14",
   "first_seen": "2026-08-31"
  },
  {
@@ -54,7 +52,6 @@
    "Bug fix for when the alarm could be triggered when the car was unlocked and opened via the passenger door."
   ],
   "cms_version": 26340,
-  "released": "2026-08-17",
   "first_seen": "2026-08-31"
  },
  {
@@ -92,7 +89,6 @@
    "Bug fix for when the alarm could be triggered when the car was unlocked and opened via the passenger door."
   ],
   "cms_version": 26170,
-  "released": "2026-04-20",
   "first_seen": "2026-08-31"
  },
  {
@@ -101,7 +97,6 @@
    "This software update provides general improvements and compatibility updates. It includes the software content released in all previous updates."
   ],
   "cms_version": 26150,
-  "released": "2026-04-06",
   "first_seen": "2026-08-31"
  },
  {
@@ -110,7 +105,6 @@
    "This software update provides general improvements and compatibility updates. It includes the software content released in all previous updates."
   ],
   "cms_version": 26110,
-  "released": "2026-03-09",
   "first_seen": "2026-08-31"
  },
  {
@@ -119,7 +113,6 @@
    "This software update provides general improvements and compatibility updates. It includes the software content released in 2.1.22."
   ],
   "cms_version": 26090,
-  "released": "2026-02-23",
   "first_seen": "2026-08-31"
  },
  {
@@ -172,7 +165,6 @@
    "Bug fix for when Google Maps would start in dark mode during daytime"
   ],
   "cms_version": 26060,
-  "released": "2026-02-02",
   "first_seen": "2026-08-31"
  },
  {
@@ -181,7 +173,6 @@
    "In line with our commitment to continuous improvement, this extra release includes refinements aimed at further improving the AC charging experience. While users may not notice any changes, these updates are part of our proactive approach to delivering key improvements as soon as they are available."
   ],
   "cms_version": 25440,
-  "released": "2025-10-27",
   "first_seen": "2026-08-31"
  },
  {
@@ -198,7 +189,6 @@
    "Apple CarPlay connectivity improved to more reliably reconnect during the next driving cycle. Previously, Apple CarPlay would not always reconnect as expected."
   ],
   "cms_version": 25360,
-  "released": "2025-09-01",
   "first_seen": "2026-08-31"
  },
  {
@@ -237,7 +227,6 @@
    "Stability improvements for AC charging. (US market only)"
   ],
   "cms_version": 25260,
-  "released": "2025-06-23",
   "first_seen": "2026-08-31"
  },
  {
@@ -246,7 +235,6 @@
    "General stability improvements."
   ],
   "cms_version": 25170,
-  "released": "2025-04-21",
   "first_seen": "2026-08-31"
  },
  {
@@ -266,7 +254,6 @@
    "Digital key and key fob profile connection improvements"
   ],
   "cms_version": 25140,
-  "released": "2025-03-31",
   "first_seen": "2026-08-31"
  },
  {
@@ -292,7 +279,6 @@
    "General stability improvements"
   ],
   "cms_version": 25040,
-  "released": "2025-01-20",
   "first_seen": "2026-08-31"
  },
  {
@@ -302,7 +288,6 @@
    "General stability improvements."
   ],
   "cms_version": 24500,
-  "released": "2024-12-09",
   "first_seen": "2026-08-31"
  },
  {
@@ -312,7 +297,6 @@
    "Compatibility update"
   ],
   "cms_version": 24480,
-  "released": "2024-11-25",
   "first_seen": "2026-08-31"
  },
  {
@@ -327,7 +311,6 @@
    "After the over-the-air (OTA) update, one or several windows might lose calibration. If this occurs, roll the affected window(s) all the way down and then all the way up and hold the window switch for one additional second. A manual initialization will be performed, and the calibration restored."
   ],
   "cms_version": 24460,
-  "released": "2024-11-11",
   "first_seen": "2026-08-31"
  },
  {
@@ -336,7 +319,6 @@
    "General stability improvements."
   ],
   "cms_version": 24420,
-  "released": "2024-10-14",
   "first_seen": "2026-08-31"
  },
  {
@@ -345,7 +327,6 @@
    "General stability improvements."
   ],
   "cms_version": 24390,
-  "released": "2024-09-23",
   "first_seen": "2026-08-31"
  },
  {
@@ -354,7 +335,6 @@
    "General stability improvements."
   ],
   "cms_version": 24370,
-  "released": "2024-09-09",
   "first_seen": "2026-08-31"
  },
  {
@@ -363,7 +343,6 @@
    "General stability improvements."
   ],
   "cms_version": 24360,
-  "released": "2024-09-02",
   "first_seen": "2026-08-31"
  },
  {
@@ -372,7 +351,6 @@
    "General stability improvements."
   ],
   "cms_version": 24250,
-  "released": "2024-06-17",
   "first_seen": "2026-08-31"
  }
 ]
