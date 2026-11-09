@@ -1,5 +1,24 @@
 [
  {
+  "version": "P3.2.12",
+  "notes": [
+   "This software update is available for all Polestar 3 vehicles that have been upgraded with the new core computer.",
+   "Updates to the driver display. Turn-by-turn guidance from Google Maps are now visible in the driver display when a destination is selected.",
+   "Updates to Surround view in the driver display, now including and displaying surrounding pedestrians, trucks, bicyclists and mopeds.",
+   "Turn off all the exterior lights while parked is introduced and can be accessed through the centre display.",
+   "Improvements to creep function, with creep activated the car will now start to roll once you’ve released the foot from the brake pedal or by a slight touch on the accelerator.",
+   "With this software version installed you will be able to initiate or schedule upcoming over the air updates through the centre display or your Polestar app.",
+   "Improvements to the Polestar app connectivity, you will now be able to see the cabin temperature in Polestar app when activating the parking climatisation.",
+   "Private locking of the glove box is introduced. You can now select and activate a pin code to be required before you access the glove box.",
+   "Trailer lamp check is introduced and can be accessed through the centre display when a compatible trailer is connected to your Polestar 3. The lamp check triggers the trailer lights to light up in sequence to easily be checked.",
+   "Manual front seat calibration is now available, see Polestar 3 manual for further details.",
+   "Connectivity improvements for AppleCar play.",
+   "Bug fix for when locking sound was still audible when turned off the sound is now turned off when selected."
+  ],
+  "cms_version": 26460,
+  "first_seen": "2026-11-09"
+ },
+ {
   "version": "P3.0.35",
   "notes": [
    "This software update provides general improvements and bug fixes."
