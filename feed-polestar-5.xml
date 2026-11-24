@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Polestar 5 Software Updates (Unofficial)</title>
+    <link>https://alexmicky19.github.io/polestar-updates/</link>
+    <atom:link href="https://alexmicky19.github.io/polestar-updates/feed-polestar-5.xml" rel="self" type="application/rss+xml"/>
+    <description>New Polestar 5 software versions and their release notes, sourced from Polestar's owner's manual. Unofficial.</description>
+    <language>en-GB</language>
+  </channel>
+</rss>
