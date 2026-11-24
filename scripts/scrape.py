@@ -734,7 +734,7 @@ def parse_manual_html_versions(page: str) -> list:
     parser.feed(page)
     versions, current = [], None
     version_heading = re.compile(
-        r"(?:updates in )?software version\s+(P?\d+(?:\\.\d+)+)\s*:?",
+        r"(?:updates in )?software version\s+(P?\d+(?:\.\d+)+)\s*:?",
         re.I,
     )
     for tag, value in parser.blocks:
