@@ -32,9 +32,8 @@ every version is dated by **"First tracked"** — when this tracker first observ
   (`releaseNotes.content.body`). Polestar 2 is **not** exposed by the JSON API, so
   it stays HTML-scraped.
 - **Polestar 3** — read from Polestar's public, unauthenticated release-notes JSON
-  API. The scraper tries the current Volvo support host
-  (`support-car-content.volvo.care`) first and retains the former Polestar-prefixed
-  hostname as a fallback. Each version carries a `cmsSoftwareVersion` **build-week
+  API. The scraper uses the verified Polestar support hostname
+  (`support-car-content.polestar.volvo.care`). Each version carries a `cmsSoftwareVersion` **build-week
   code** in `YYWW` form (e.g. `26380` → 2026, ISO week 38). This is when the build
   was **registered**, not released, so it is shown for traceability only.
 - **Polestar 4** — primary source is the public release-notes JSON API
@@ -49,11 +48,11 @@ Neither source has a true release-date field, so `first_seen` is the honest sign
 the same approach as the reference
 [Polestar 4 tracker](https://jaybizzle.github.io/polestar4-updates).
 
-### Build codes, cadence & forecast (Polestar 3)
+### Build codes, cadence & forecast (API-backed models)
 
-For the API-sourced Polestar 3, the tracker mirrors the build-code and forecast signals
+For API-sourced models, the tracker mirrors the build-code and forecast signals
 from the reference [Polestar 4 tracker](https://jaybizzle.github.io/polestar4-updates).
-Polestar 2, 4 and 5 are sourced from their manuals and do not expose the same build-code
+Polestar 2 and currently Polestar 5 do not expose the same build-code
 and registered-build metadata through this scraper.
 
 - **Build code on every version** — the raw `YYWW` code shown for traceability, e.g.
