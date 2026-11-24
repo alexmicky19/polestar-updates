@@ -21,7 +21,7 @@ date this tracker first observed it — the same approach as the Polestar 4 trac
 
 No browser / heavy deps required — just urllib from the stdlib.
 """
-import json, re, sys, urllib.request, pathlib, html as _html, datetime
+import json, re, sys, urllib.request, urllib.error, pathlib, html as _html, datetime, socket, time
 
 # Each model: slug used in filenames/URLs, human label, data source, and its manual
 # URL. API models also carry a numeric `model_code`. Add a new model here (e.g.
@@ -58,10 +58,39 @@ INDEX = ROOT / "index.html"
 DATA_DIR = ROOT / "data"
 
 
-def fetch(url: str) -> str:
-    req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language": "en-GB,en;q=0.9"})
-    with urllib.request.urlopen(req, timeout=45) as r:
-        return r.read().decode("utf-8", "replace")
+def fetch(url: str, retries: int = 4, timeout: int = 45) -> str:
+    """Fetch a URL with bounded retries for transient DNS, network and server errors.
+
+    DNS failures on hosted runners can be brief. Retry those (and HTTP 429/5xx)
+    with exponential backoff, but fail immediately for permanent HTTP errors.
+    """
+    for attempt in range(retries):
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": UA, "Accept-Language": "en-GB,en;q=0.9"},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as response:
+                return response.read().decode("utf-8", "replace")
+        except urllib.error.HTTPError as exc:
+            if exc.code != 429 and not 500 <= exc.code < 600:
+                raise
+            error = exc
+        except (urllib.error.URLError, socket.timeout, TimeoutError) as exc:
+            error = exc
+
+        if attempt == retries - 1:
+            raise error
+
+        delay = 5 * (2 ** attempt)
+        print(
+            f"  Request failed ({attempt + 1}/{retries}): {error}. "
+            f"Retrying in {delay}s...",
+            file=sys.stderr,
+        )
+        time.sleep(delay)
+
+    raise RuntimeError(f"Request failed after {retries} attempts: {url}")
 
 
 def _find_matching_brace(page: str, start: int) -> int:
@@ -421,19 +450,49 @@ def main():
     all_data = {}  # slug -> versions, for the embedded DATA object
     all_meta = {}  # slug -> meta (space_software_version, upcoming), for META object
 
+    failed_models = []
+
     for model in MODELS:
-        versions, meta = scrape_model(model, local_map.get(model["slug"]))
-        (DATA_DIR / f"{model['slug']}.json").write_text(
+        slug = model["slug"]
+        data_path = DATA_DIR / f"{slug}.json"
+        meta_path = DATA_DIR / f"{slug}.meta.json"
+        try:
+            versions, meta = scrape_model(model, local_map.get(slug))
+        except (Exception, SystemExit) as exc:
+            print(f"ERROR scraping {slug}: {exc}", file=sys.stderr)
+            # Keep the last known-good data in the generated index, but do not
+            # rewrite this model's files from a failed/partial response.
+            try:
+                versions = json.loads(data_path.read_text(encoding="utf-8"))
+                if not isinstance(versions, list) or not versions:
+                    raise ValueError("cached version data is empty or invalid")
+                meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
+            except Exception as cache_error:
+                failed_models.append(slug)
+                print(f"ERROR no usable cached data for {slug}: {cache_error}", file=sys.stderr)
+                continue
+
+            all_data[slug] = versions
+            all_meta[slug] = meta
+            print(
+                f"  {slug}: using {len(versions)} cached versions "
+                f"(latest {versions[0]['version']}); this run is incomplete",
+                file=sys.stderr,
+            )
+            failed_models.append(slug)
+            continue
+
+        data_path.write_text(
             json.dumps(versions, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-        (ROOT / f"feed-{model['slug']}.xml").write_text(build_feed(model, versions), encoding="utf-8")
-        all_data[model["slug"]] = versions
-        all_meta[model["slug"]] = meta
+        (ROOT / f"feed-{slug}.xml").write_text(build_feed(model, versions), encoding="utf-8")
+        all_data[slug] = versions
+        all_meta[slug] = meta
         # Persist meta alongside the data for traceability (the UI reads the inlined
         # META object, not this file). Only meaningful for API models.
-        (DATA_DIR / f"{model['slug']}.meta.json").write_text(
+        meta_path.write_text(
             json.dumps(meta, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         up = meta.get("upcoming") or []
-        print(f"  {model['slug']}: {len(versions)} versions, latest {versions[0]['version']}"
+        print(f"  {slug}: {len(versions)} versions, latest {versions[0]['version']}"
               + (f", {len(up)} upcoming" if model.get("source") == "api" else ""))
 
     # Splice the combined DATA object (keyed by slug) + META + MODELS metadata into index.html.
@@ -455,6 +514,13 @@ def main():
     if changed:
         INDEX.write_text(new_index, encoding="utf-8")
     print(f"index.html: {'updated' if changed else 'no change'}")
+
+    # Do not let the workflow commit a mixed snapshot. Successful models may have
+    # been scraped, but any failure keeps the workflow red so no partial data ships.
+    if failed_models:
+        raise SystemExit(
+            "Scrape incomplete; preserved cached data for: " + ", ".join(failed_models)
+        )
 
 
 if __name__ == "__main__":
