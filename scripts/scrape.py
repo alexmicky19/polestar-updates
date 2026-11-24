@@ -9,7 +9,7 @@ Two data sources, chosen per model via its `source` field:
   contains a `releaseNotes.content.body` structure. We fetch the HTML, isolate that
   object by balanced-brace scanning, and walk it into a flat list of {version,
   notes[]}. P2 is not exposed by the JSON API, so it stays HTML-scraped.
-- "api" (Polestar 3): the manual pages are backed by a public, unauthenticated JSON
+- "api" (Polestar 3/4/5): the manual pages are backed by a public, unauthenticated JSON
   API. We resolve the en-GB release-notes document and read structured segments,
   each carrying a `cmsSoftwareVersion` YYWW build-week code (shown for traceability).
 
@@ -39,6 +39,20 @@ MODELS = [
         "source": "api",
         "model_code": "359",
         "manual_url": "https://www.polestar.com/uk/manual/polestar-3/2025/software-updates/",
+    },
+    {
+        "slug": "polestar-4",
+        "label": "Polestar 4",
+        "source": "api",
+        "model_code": "814",
+        "manual_url": "https://www.polestar.com/uk/manual/polestar-4/2026/software-updates/",
+    },
+    {
+        "slug": "polestar-5",
+        "label": "Polestar 5",
+        "source": "api",
+        "model_code": "824",
+        "manual_url": "https://www.polestar.com/uk/manual/polestar-5/2026/software-updates/",
     },
 ]
 
