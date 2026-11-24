@@ -257,7 +257,7 @@ def _flatten_api_notes(node, out: list, inherited=None) -> None:
             _flatten_api_notes(child, out, inherited)
         return
     if isinstance(node, str):
-        text = re.sub(r"\\s+", " ", node).strip()
+        text = re.sub(r"\s+", " ", node).strip()
         if text:
             out.append({"text": text, **inherited})
         return
@@ -277,7 +277,7 @@ def _flatten_api_notes(node, out: list, inherited=None) -> None:
                 pieces = []
                 _flatten_api_notes(child, pieces, gates)
                 own.extend(pieces)
-        text = re.sub(r"\\s+", " ", "".join(p["text"] for p in own)).strip()
+        text = re.sub(r"\s+", " ", "".join(p["text"] for p in own)).strip()
         if text:
             out.append({"text": text, **gates})
         for child in nested:
@@ -471,12 +471,12 @@ def attach_api_build_numbers(versions: list, model_code: str, published_max: int
     except Exception:
         records = []
     by_key = {
-        ".".join(re.findall(r"\\d+", str(v.get("carVersion", "")))): v["internalVersion"]
+        ".".join(re.findall(r"\d+", str(v.get("carVersion", "")))): v["internalVersion"]
         for v in records if v.get("carVersion")
     }
     return [
-        {**v, **({"internal_version": by_key[".".join(re.findall(r"\\d+", v["version"]))]}
-                 if ".".join(re.findall(r"\\d+", v["version"])) in by_key else {})}
+        {**v, **({"internal_version": by_key[".".join(re.findall(r"\d+", v["version"]))]}
+                 if ".".join(re.findall(r"\d+", v["version"])) in by_key else {})}
         for v in versions
     ]
 
