@@ -1,6 +1,6 @@
 # Polestar Software Updates — Unofficial Tracker
 
-A single-page tracker of every released **Polestar 2** and **Polestar 3** software
+A single-page tracker of every released **Polestar 2**, **Polestar 3**, **Polestar 4** and **Polestar 5** software
 version and its official release notes, styled after the
 [Polestar 4 updates tracker](https://jaybizzle.github.io/polestar4-updates).
 
@@ -8,12 +8,12 @@ version and its official release notes, styled after the
 
 ## What it shows
 
-- A **model toggle** (Polestar 2 / Polestar 3) — one page, switch between models.
+- A **model toggle** (Polestar 2 / 3 / 4 / 5) — one page, switch between models.
 - The latest documented software version per model.
 - The full release history, newest first, each version expandable to its
   official release notes (model-year sub-sections preserved).
 - Live search across versions and notes, plus expand/collapse-all.
-- An **RSS feed per model** (`feed-polestar-2.xml`, `feed-polestar-3.xml`).
+- An **RSS feed per model** (`feed-polestar-2.xml`, `feed-polestar-3.xml`, `feed-polestar-4.xml`, `feed-polestar-5.xml`).
 
 ## RSS feeds
 
@@ -31,9 +31,11 @@ every version is dated by **"First tracked"** — when this tracker first observ
   which embeds the release notes as a Remix context blob
   (`releaseNotes.content.body`). Polestar 2 is **not** exposed by the JSON API, so
   it stays HTML-scraped.
-- **Polestar 3** — read from Polestar's public, unauthenticated release-notes JSON
-  API (`https://support-car-content.polestar.volvo.care`, the source behind the
-  [Polestar 3 manual page](https://www.polestar.com/uk/manual/polestar-3/2025/software-updates/)).
+- **Polestar 3, 4 and 5** — read from Polestar's public, unauthenticated release-notes JSON
+  API (`https://support-car-content.polestar.volvo.care`), which also backs the
+  [Polestar 3](https://www.polestar.com/uk/manual/polestar-3/2025/software-updates/),
+  [Polestar 4](https://www.polestar.com/uk/manual/polestar-4/2026/software-updates/) and
+  [Polestar 5](https://www.polestar.com/uk/manual/polestar-5/2026/software-updates/) manual pages.
   Each version carries a `cmsSoftwareVersion` **build-week code** in `YYWW` form
   (e.g. `26380` → 2026, ISO week 38). This is when the build was **registered**, not
   released — it leads the public rollout by a week or two — so it is shown for
@@ -43,11 +45,11 @@ Neither source has a true release-date field, so `first_seen` is the honest sign
 the same approach as the reference
 [Polestar 4 tracker](https://jaybizzle.github.io/polestar4-updates).
 
-### Build codes, cadence & forecast (Polestar 3 only)
+### Build codes, cadence & forecast (API-sourced models)
 
 For API-sourced models the tracker mirrors the three signals the reference
-[Polestar 4 tracker](https://jaybizzle.github.io/polestar4-updates) shows. These are
-**Polestar 3 only** — Polestar 2 is HTML-scraped, has no build codes and no registered
+[Polestar 4 tracker](https://jaybizzle.github.io/polestar4-updates) shows. These apply to
+**Polestar 3, 4 and 5** — Polestar 2 is HTML-scraped, has no build codes and no registered
 version list, so its rows and banner are unchanged.
 
 - **Build code on every version** — the raw `YYWW` code shown for traceability, e.g.
