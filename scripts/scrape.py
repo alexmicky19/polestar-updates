@@ -24,6 +24,7 @@ No browser / heavy deps required — just urllib from the stdlib.
 """
 import json, re, sys, urllib.request, urllib.error, pathlib, html as _html, datetime, socket, time
 from concurrent.futures import ThreadPoolExecutor
+from html.parser import HTMLParser
 from urllib.parse import urlparse
 
 # Each model: slug used in filenames/URLs, human label, data source, and its manual
@@ -54,15 +55,15 @@ MODELS = [
         "slug": "polestar-5",
         "label": "Polestar 5",
         "source": "api",
-        "discover_model_code": True,
+        "model_code": "824",
         "manual_url": "https://www.polestar.com/uk/manual/polestar-5/2026/software-updates/",
     },
 ]
 
-# Public, unauthenticated Volvo/Polestar release-notes API. The reference P4
-# implementation uses this hostname. Keep it as the single verified host until
-# an alternative has been proven to serve the same API; do not guess hostnames.
-API_BASES = ("https://support-car-content.polestar.volvo.care",)
+# Public, unauthenticated Volvo/Polestar release-notes API. The current Volvo
+# support host is used by the live car-content release-notes endpoints. The old
+# Polestar-prefixed hostname no longer resolves on GitHub-hosted runners.
+API_BASES = ("https://support-car-content.volvo.care",)
 API_BASE = API_BASES[0]
 
 # Lists every model and the software versions Polestar has *registered* (incl. builds
@@ -337,23 +338,6 @@ def parse_api_release_notes(document: dict) -> list:
         if update.get("cms_version") is not None:
             update["internal_version"] = update["cms_version"]
     return updates
-
-
-def discover_api_model_code(model_label: str) -> str:
-    """Discover a model code from the public models feed when no code is configured."""
-    doc = fetch_api_json(AVAILABLE_MODELS_PATH)
-    models = doc if isinstance(doc, list) else doc.get("models") or doc.get("carModels") or []
-    match = next(
-        (item for item in models
-         if model_label.lower() in str(item.get("name") or item.get("modelName") or "").lower()
-         and item.get("modelCode") is not None),
-        None,
-    )
-    if not match:
-        raise RuntimeError(
-            f"available-car-models did not expose a model code for {model_label}"
-        )
-    return str(match["modelCode"])
 
 
 def fetch_api_versions(model_code: str) -> tuple[list, int | None]:
@@ -702,6 +686,76 @@ def build_feed(model: dict, versions: list) -> str:
     )
 
 
+class _ManualReleaseNotesHTMLParser(HTMLParser):
+    """Extract visible headings, paragraphs and list items from a Polestar manual page."""
+
+    BLOCK_TAGS = {"h1", "h2", "h3", "h4", "p", "li"}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.skip_depth = 0
+        self.active_tag = None
+        self.parts = []
+        self.blocks = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag in {"script", "style", "noscript"}:
+            self.skip_depth += 1
+            return
+        if self.skip_depth:
+            return
+        if tag in self.BLOCK_TAGS:
+            self._flush()
+            self.active_tag = tag
+
+    def handle_endtag(self, tag):
+        if tag in {"script", "style", "noscript"} and self.skip_depth:
+            self.skip_depth -= 1
+            return
+        if not self.skip_depth and tag == self.active_tag:
+            self._flush()
+
+    def handle_data(self, data):
+        if not self.skip_depth and self.active_tag and data.strip():
+            self.parts.append(data)
+
+    def _flush(self):
+        if self.active_tag:
+            value = re.sub(r"\s+", " ", " ".join(self.parts)).strip()
+            if value:
+                self.blocks.append((self.active_tag, value))
+        self.active_tag = None
+        self.parts = []
+
+
+def parse_manual_html_versions(page: str) -> list:
+    """Fallback parser for manual pages that no longer expose the Remix releaseNotes blob."""
+    parser = _ManualReleaseNotesHTMLParser()
+    parser.feed(page)
+    versions, current = [], None
+    version_heading = re.compile(
+        r"(?:updates in )?software version\s+(P?\d+(?:\.\d+)+)\s*:?",
+        re.I,
+    )
+    for tag, value in parser.blocks:
+        match = version_heading.search(value)
+        if match:
+            version = match.group(1)
+            if not version.upper().startswith("P"):
+                version = "P" + version
+            current = next((item for item in versions if item["version"] == version), None)
+            if current is None:
+                current = {"version": version, "notes": []}
+                versions.append(current)
+            continue
+        if current is None:
+            continue
+        note = ("### " + value) if tag in {"h2", "h3", "h4"} else value
+        if note not in current["notes"]:
+            current["notes"].append(note)
+    return [item for item in versions if item["notes"]]
+
+
 def scrape_model(model: dict, local: str | None):
     """Return ``(versions, meta)`` for one model: the sorted, first-seen-stamped
     version list plus a per-model meta dict.
@@ -723,8 +777,6 @@ def scrape_model(model: dict, local: str | None):
     if model.get("source") == "api":
         try:
             model_code = model.get("model_code")
-            if not model_code and model.get("discover_model_code"):
-                model_code = discover_api_model_code(model["label"])
             if not model_code:
                 raise RuntimeError(f"no verified API model code configured for {model['label']}")
             versions, space = fetch_api_versions(model_code)
@@ -741,8 +793,13 @@ def scrape_model(model: dict, local: str | None):
         # The manual is a last-resort live source, never the first choice for API models.
         if versions is None:
             page = pathlib.Path(local).read_text(encoding="utf-8", errors="replace") if local else fetch(model["manual_url"])
-            rn = extract_release_notes_object(page)
-            versions = parse_versions(rn)
+            try:
+                rn = extract_release_notes_object(page)
+                versions = parse_versions(rn)
+            except (SystemExit, ValueError, json.JSONDecodeError):
+                versions = []
+            if not versions:
+                versions = parse_manual_html_versions(page)
             validate_model_versions(versions, cached)
             meta["source_used"] = "manual_fallback"
             meta["api_error"] = str(api_error)

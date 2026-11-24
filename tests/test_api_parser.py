@@ -63,6 +63,21 @@ class PolestarApiParserTests(unittest.TestCase):
             ["Market-specific improvement.", "Second market note."],
         )
 
+    def test_parses_p5_manual_html_without_remix_blob(self):
+        page = """
+        <html><body>
+          <h2>Updates in Software Version P5.0.3</h2>
+          <p>This software update provides general improvements and bug fixes.</p>
+          <h2>Updates in Software Version P5.0.2</h2>
+          <p>Bug fix for when the Polestar app is showing incorrect car status information.</p>
+          <h2>Updates in Software Version P5.0.1</h2>
+          <p>This software update provides general improvements and compatibility updates.</p>
+        </body></html>
+        """
+        versions = SCRAPER.parse_manual_html_versions(page)
+        self.assertEqual([v["version"] for v in versions], ["P5.0.3", "P5.0.2", "P5.0.1"])
+        self.assertEqual(versions[0]["notes"], ["This software update provides general improvements and bug fixes."])
+
     def test_negative_only_gate_is_not_market_specific(self):
         self.assertEqual(SCRAPER.positive_gates("(!MU13 & !MU32)"), [])
         self.assertEqual(SCRAPER.positive_gates("(MU66 | MU64)"), ["MU66", "MU64"])
