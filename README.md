@@ -31,15 +31,17 @@ every version is dated by **"First tracked"** — when this tracker first observ
   which embeds the release notes as a Remix context blob
   (`releaseNotes.content.body`). Polestar 2 is **not** exposed by the JSON API, so
   it stays HTML-scraped.
-- **Polestar 3, 4 and 5** — read from Polestar's public, unauthenticated release-notes JSON
-  API (`https://support-car-content.polestar.volvo.care`), which also backs the
-  [Polestar 3](https://www.polestar.com/uk/manual/polestar-3/2025/software-updates/),
+- **Polestar 3** — read from Polestar's public, unauthenticated release-notes JSON
+  API. The scraper tries the current Volvo support host
+  (`support-car-content.volvo.care`) first and retains the former Polestar-prefixed
+  hostname as a fallback. Each version carries a `cmsSoftwareVersion` **build-week
+  code** in `YYWW` form (e.g. `26380` → 2026, ISO week 38). This is when the build
+  was **registered**, not released, so it is shown for traceability only.
+- **Polestar 4 and 5** — scraped directly from their official
   [Polestar 4](https://www.polestar.com/uk/manual/polestar-4/2026/software-updates/) and
-  [Polestar 5](https://www.polestar.com/uk/manual/polestar-5/2026/software-updates/) manual pages.
-  Each version carries a `cmsSoftwareVersion` **build-week code** in `YYWW` form
-  (e.g. `26380` → 2026, ISO week 38). This is when the build was **registered**, not
-  released — it leads the public rollout by a week or two — so it is shown for
-  **traceability only** and is **not** used as a release date.
+  [Polestar 5](https://www.polestar.com/uk/manual/polestar-5/2026/software-updates/)
+  software-update manual pages. This avoids depending on the legacy API hostname
+  for these models and uses the release history Polestar publishes to owners.
 
 Neither source has a true release-date field, so `first_seen` is the honest signal —
 the same approach as the reference
@@ -72,8 +74,9 @@ Everything is driven by the `MODELS` list at the top of `scripts/scrape.py`. Eac
 entry has a `slug`, `label`, `manual_url`, and a `source`:
 
 - `"source": "html"` — HTML-scrape the `manual_url` (like Polestar 2).
-- `"source": "api"` — read the JSON API; also set `"model_code"` (Polestar 3 = 359,
-  Polestar 4 = 814, Polestar 4 SUV = 815, Polestar 5 = 824).
+- `"source": "api"` — read the JSON API; also set `"model_code"` (Polestar 3 = 359).
+  Use the official manual's HTML source for models whose software history is published
+  directly on the manual page (currently Polestar 2, 4 and 5).
 
 Add a new model there and the scraper produces `data/<slug>.json` +
 `feed-<slug>.xml`, the page grows a new toggle tab, and the notifier workflow covers
@@ -102,7 +105,10 @@ python3 scripts/scrape.py        # fetches all models live + rewrites index.html
 python3 scripts/scrape.py --local polestar-2 path/to/p2.html --local polestar-3 path/to/p3.html
 ```
 
-The scraper uses only the Python standard library — no dependencies to install.
+The scraper uses only the Python standard library — no dependencies to install. If one
+model's source is unavailable, it preserves that model's last-known-good data and still
+publishes successful updates for the other models. GitHub Actions marks partial scrapes
+with a warning; the workflow fails only when every model source is unavailable.
 
 ## License
 
