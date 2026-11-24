@@ -32,17 +32,18 @@ every version is dated by **"First tracked"** — when this tracker first observ
   (`releaseNotes.content.body`). Polestar 2 is **not** exposed by the JSON API, so
   it stays HTML-scraped.
 - **Polestar 3** — read from Polestar's public, unauthenticated release-notes JSON
-  API. The scraper uses the verified Polestar support hostname
-  (`support-car-content.polestar.volvo.care`). Each version carries a `cmsSoftwareVersion` **build-week
+  API. The scraper uses the current Volvo car-content hostname
+  (`support-car-content.volvo.care`); the old Polestar-prefixed host no longer
+  resolves reliably on GitHub-hosted runners. Each version carries a `cmsSoftwareVersion` **build-week
   code** in `YYWW` form (e.g. `26380` → 2026, ISO week 38). This is when the build
   was **registered**, not released, so it is shown for traceability only.
 - **Polestar 4** — primary source is the public release-notes JSON API
   (model code `814`), using structured note parsing and market/config validity gates.
   Its official manual page is used only if the API fails or its response fails validation.
-- **Polestar 5** — attempts API model-code discovery through the public available-models
-  feed first. If that feed does not expose the model (it may be empty for anonymous
-  callers), the official manual is used only as the last-resort fallback. No model code
-  is guessed; once independently confirmed, it can be configured directly.
+- **Polestar 5** — uses the JSON API with model code `824`. If the API fails,
+  the official manual remains the last-resort fallback. The fallback parser can read
+  visible release-note headings and paragraphs even when the page no longer embeds
+  the older Remix `releaseNotes` object.
 
 Neither source has a true release-date field, so `first_seen` is the honest signal —
 the same approach as the reference
@@ -53,8 +54,8 @@ the same approach as the reference
 For API-sourced models, the tracker mirrors the build-code and forecast signals
 from the reference [Polestar 4 tracker](https://jaybizzle.github.io/polestar4-updates).
 Polestar 2 does not expose the same build-code and registered-build metadata.
-Polestar 5 receives it only if API model-code discovery succeeds; otherwise it uses
-the manual fallback and retains no API build metadata.
+Polestar 5 receives build metadata when its API is available; otherwise it uses the
+manual fallback and retains no API build metadata.
 
 - **Build code on every version** — the raw `YYWW` code shown for traceability, e.g.
   `build 26380 · 2026 wk 38`.
