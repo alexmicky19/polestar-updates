@@ -1,0 +1,32 @@
+name: Validate tracker configuration
+
+on:
+  pull_request:
+    paths:
+      - "scripts/**"
+      - "tests/**"
+      - "data/**"
+      - "feed-*.xml"
+      - "index.html"
+      - ".github/workflows/**"
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Compile scraper
+        run: python -m py_compile scripts/scrape.py
+
+      - name: Test model configuration and generated assets
+        run: python -m unittest discover -s tests -v
