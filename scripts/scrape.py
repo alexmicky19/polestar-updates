@@ -257,9 +257,9 @@ def _flatten_api_notes(node, out: list, inherited=None) -> None:
             _flatten_api_notes(child, out, inherited)
         return
     if isinstance(node, str):
-        text = re.sub(r"\s+", " ", node).strip()
-        if text:
-            out.append({"text": text, **inherited})
+        # Preserve inline whitespace until the enclosing paragraph joins its children.
+        if node:
+            out.append({"text": node, **inherited})
         return
     if not isinstance(node, dict) or node.get("type") in {"title", "footnote"}:
         return
