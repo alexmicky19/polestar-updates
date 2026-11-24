@@ -9,7 +9,7 @@ Two data sources, chosen per model via its `source` field:
   contains a `releaseNotes.content.body` structure. We fetch the HTML, isolate that
   object by balanced-brace scanning, and walk it into a flat list of {version,
   notes[]}. P2 is not exposed by the JSON API, so it stays HTML-scraped.
-- "api" (Polestar 3/4/5): the manual pages are backed by a public, unauthenticated JSON
+- "api" (Polestar 3): the manual page is backed by a public, unauthenticated JSON
   API. We resolve the en-GB release-notes document and read structured segments,
   each carrying a `cmsSoftwareVersion` YYWW build-week code (shown for traceability).
 
@@ -22,6 +22,7 @@ date this tracker first observed it — the same approach as the Polestar 4 trac
 No browser / heavy deps required — just urllib from the stdlib.
 """
 import json, re, sys, urllib.request, urllib.error, pathlib, html as _html, datetime, socket, time
+from urllib.parse import urlparse
 
 # Each model: slug used in filenames/URLs, human label, data source, and its manual
 # URL. API models also carry a numeric `model_code`. Add a new model here (e.g.
@@ -43,21 +44,26 @@ MODELS = [
     {
         "slug": "polestar-4",
         "label": "Polestar 4",
-        "source": "api",
-        "model_code": "814",
+        "source": "html",
         "manual_url": "https://www.polestar.com/uk/manual/polestar-4/2026/software-updates/",
     },
     {
         "slug": "polestar-5",
         "label": "Polestar 5",
-        "source": "api",
-        "model_code": "824",
+        "source": "html",
         "manual_url": "https://www.polestar.com/uk/manual/polestar-5/2026/software-updates/",
     },
 ]
 
-# Public, unauthenticated Polestar release-notes JSON API (backs the manual pages).
-API_BASE = "https://support-car-content.polestar.volvo.care"
+# Public, unauthenticated Volvo/Polestar release-notes API. Polestar's old
+# polestar-prefixed hostname stopped resolving on GitHub-hosted runners in Nov 2026.
+# Prefer the current Volvo support host and retain the old host as a compatibility
+# fallback in case the service is regionally migrated.
+API_BASES = (
+    "https://support-car-content.volvo.care",
+    "https://support-car-content.polestar.volvo.care",
+)
+API_BASE = API_BASES[0]
 
 # Lists every model and the software versions Polestar has *registered* (incl. builds
 # not yet published as release notes). Used to derive the "in the pipeline" list.
@@ -226,10 +232,17 @@ def fetch_api_json(path_or_url: str) -> dict:
     without a leading slash); follows redirects (the content host 303-redirects to
     an internal mirror)."""
     if path_or_url.startswith("http"):
-        url = path_or_url
-    else:
-        url = API_BASE + "/" + path_or_url.lstrip("/")
-    return json.loads(fetch(url))
+        return json.loads(fetch(path_or_url))
+
+    path = "/" + path_or_url.lstrip("/")
+    errors = []
+    for base in API_BASES:
+        url = base + path
+        try:
+            return json.loads(fetch(url))
+        except Exception as exc:
+            errors.append(f"{base}: {exc}")
+    raise RuntimeError("All Polestar API hosts failed: " + " | ".join(errors))
 
 
 def _seg_version(seg: dict) -> str | None:
@@ -465,6 +478,17 @@ def main():
     all_meta = {}  # slug -> meta (space_software_version, upcoming), for META object
 
     failed_models = []
+    successful_models = 0
+
+    # Report DNS status up front. This is diagnostic only: HTML-sourced models
+    # can still be refreshed when the API host is unavailable.
+    for base in API_BASES:
+        host = urlparse(base).hostname
+        try:
+            socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM)
+            print(f"API DNS OK: {host}")
+        except OSError as exc:
+            print(f"::warning title=Polestar API DNS::{host} did not resolve: {exc}")
 
     for model in MODELS:
         slug = model["slug"]
@@ -482,20 +506,27 @@ def main():
                     raise ValueError("cached version data is empty or invalid")
                 meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
             except Exception as cache_error:
-                failed_models.append(slug)
-                print(f"ERROR no usable cached data for {slug}: {cache_error}", file=sys.stderr)
-                continue
+                # Keep the model key in the generated page even on its first
+                # bootstrap failure; a later successful scrape fills it in.
+                versions, meta = [], {}
+                print(
+                    f"WARNING no cached data for {slug}: {cache_error}",
+                    file=sys.stderr,
+                )
+            else:
+                latest = f", latest {versions[0]['version']}" if versions else ""
+                print(
+                    f"  {slug}: using {len(versions)} cached versions{latest}; "
+                    "this run is incomplete",
+                    file=sys.stderr,
+                )
 
             all_data[slug] = versions
             all_meta[slug] = meta
-            print(
-                f"  {slug}: using {len(versions)} cached versions "
-                f"(latest {versions[0]['version']}); this run is incomplete",
-                file=sys.stderr,
-            )
             failed_models.append(slug)
             continue
 
+        successful_models += 1
         data_path.write_text(
             json.dumps(versions, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         (ROOT / f"feed-{slug}.xml").write_text(build_feed(model, versions), encoding="utf-8")
@@ -529,12 +560,14 @@ def main():
         INDEX.write_text(new_index, encoding="utf-8")
     print(f"index.html: {'updated' if changed else 'no change'}")
 
-    # Do not let the workflow commit a mixed snapshot. Successful models may have
-    # been scraped, but any failure keeps the workflow red so no partial data ships.
+    # Publish successful model updates even when another source is temporarily
+    # unavailable. Failed models retain their last-known-good cache (or an empty
+    # bootstrap list); surface a warning instead of discarding successful work.
     if failed_models:
-        raise SystemExit(
-            "Scrape incomplete; preserved cached data for: " + ", ".join(failed_models)
-        )
+        message = "Scrape incomplete; preserved cached data for: " + ", ".join(failed_models)
+        print(f"::warning title=Partial Polestar scrape::{message}")
+        if successful_models == 0:
+            raise SystemExit(message)
 
 
 if __name__ == "__main__":
