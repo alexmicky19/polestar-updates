@@ -721,7 +721,7 @@ class _ManualReleaseNotesHTMLParser(HTMLParser):
 
     def _flush(self):
         if self.active_tag:
-            value = re.sub(r"\\s+", " ", " ".join(self.parts)).strip()
+            value = re.sub(r"\s+", " ", " ".join(self.parts)).strip()
             if value:
                 self.blocks.append((self.active_tag, value))
         self.active_tag = None
@@ -734,7 +734,7 @@ def parse_manual_html_versions(page: str) -> list:
     parser.feed(page)
     versions, current = [], None
     version_heading = re.compile(
-        r"(?:updates in )?software version\\s+(P?\\d+(?:\\.\\d+)+)\\s*:?",
+        r"(?:updates in )?software version\s+(P?\d+(?:\\.\d+)+)\s*:?",
         re.I,
     )
     for tag, value in parser.blocks:
