@@ -249,16 +249,16 @@ def positive_gates(expr) -> list:
 
 
 def _flatten_api_notes(node, out: list, inherited=None) -> None:
-    """Flatten API rich-text nodes while retaining validities/features gates."""
+    """Flatten rich text into note lines, inheriting market/config validity gates."""
     inherited = inherited or {"validities": None, "features": None}
+    if isinstance(node, list):
+        for child in node:
+            _flatten_api_notes(child, out, inherited)
+        return
     if isinstance(node, str):
         text = re.sub(r"\\s+", " ", node).strip()
         if text:
             out.append({"text": text, **inherited})
-        return
-    if isinstance(node, list):
-        for child in node:
-            _flatten_api_notes(child, out, inherited)
         return
     if not isinstance(node, dict) or node.get("type") in {"title", "footnote"}:
         return
@@ -266,17 +266,27 @@ def _flatten_api_notes(node, out: list, inherited=None) -> None:
         "validities": node.get("validities", inherited["validities"]),
         "features": node.get("features", inherited["features"]),
     }
-    children = node.get("children")
-    if isinstance(children, str):
-        text = re.sub(r"\\s+", " ", children).strip()
-        if text and node.get("type") in {"paragraph", "listItem", "listIntro"}:
+    children = node.get("children") or []
+    if node.get("type") in {"paragraph", "listItem", "listIntro"}:
+        own, nested = [], []
+        for child in children if isinstance(children, list) else [children]:
+            if isinstance(child, dict) and child.get("type") in {"unorderedList", "orderedList", "note"}:
+                nested.append(child)
+            else:
+                pieces = []
+                _flatten_api_notes(child, pieces, gates)
+                own.extend(pieces)
+        text = re.sub(r"\\s+", " ", "".join(p["text"] for p in own)).strip()
+        if text:
             out.append({"text": text, **gates})
+        for child in nested:
+            _flatten_api_notes(child, out, gates)
         return
     _flatten_api_notes(children, out, gates)
 
 
 def parse_api_release_notes(document: dict) -> list:
-    """Parse version segments and annotate notes restricted to markets/configs."""
+    """Parse all version segments and retain market/config-specific note flags."""
     body = document.get("releaseNotesDocument", {}).get("body", [])
     updates, current = [], None
     for segment in body:
@@ -291,14 +301,11 @@ def parse_api_release_notes(document: dict) -> list:
             version = match.group(1).strip()
             current = next((u for u in updates if u["version"] == version), None)
             if current is None:
-                current = {"version": version, "notes": [], "_gates": {}}
+                current = {"version": version, "notes": [], "_gates": {}, "cms_version": None}
                 updates.append(current)
         if current is None:
             continue
-        inherited = {
-            "validities": segment.get("validities"),
-            "features": segment.get("features"),
-        }
+        inherited = {"validities": segment.get("validities"), "features": segment.get("features")}
         lines = []
         _flatten_api_notes(children, lines, inherited)
         for line in lines:
@@ -306,6 +313,12 @@ def parse_api_release_notes(document: dict) -> list:
             if note not in current["notes"]:
                 current["notes"].append(note)
             current["_gates"].setdefault(note, []).append(line)
+        cms = segment.get("cmsSoftwareVersion")
+        if cms is not None:
+            try:
+                current["cms_version"] = max(int(cms), int(current["cms_version"] or 0))
+            except (TypeError, ValueError):
+                pass
 
     for update in updates:
         specific = []
@@ -322,8 +335,8 @@ def parse_api_release_notes(document: dict) -> list:
     return updates
 
 
-def fetch_api_versions(model_code: str) -> list:
-    """Fetch cumulative release notes and resolve the en-GB document."""
+def fetch_api_versions(model_code: str) -> tuple[list, int | None]:
+    """Fetch cumulative release notes and manifest's latest published build."""
     manifest = fetch_api_json(
         f"/api/car-content/SOFTWARE_RELEASE_NOTES/{model_code}/UNTIL/99.0.0"
     )
@@ -338,7 +351,131 @@ def fetch_api_versions(model_code: str) -> list:
     relative_url = entry.get("relativeUrl")
     if not relative_url:
         raise RuntimeError(f"API manifest for model {model_code} has no relativeUrl")
-    return parse_api_release_notes(fetch_api_json(relative_url))
+    versions = parse_api_release_notes(fetch_api_json(relative_url))
+    space = manifest.get("spaceSoftwareVersion")
+    try:
+        space = int(space) if space is not None else None
+    except (TypeError, ValueError):
+        space = None
+    return versions, space
+
+
+def _manual_probe_builds(published_max: int, weeks_ahead: int = 12) -> list[int]:
+    """Candidate YYWW0-YYWW2 build IDs from published week through 12 weeks ahead."""
+    now = datetime.date.today()
+    iso = now.isocalendar()
+    end_year, end_week = iso.year % 100, iso.week + weeks_ahead
+    if end_week > 52:
+        end_year += 1
+        end_week -= 52
+    yy, ww = published_max // 1000, (published_max // 10) % 100
+    candidates = [published_max]
+    for _ in range(80):
+        if (yy, ww) > (end_year, end_week):
+            break
+        for suffix in range(3):
+            value = yy * 1000 + ww * 10 + suffix
+            if value > published_max:
+                candidates.append(value)
+        ww += 1
+        if ww > 53:
+            yy, ww = yy + 1, 1
+    return candidates
+
+
+def _probe_manual_build(base: str, model_code: str, build: int) -> bool:
+    url = f"{base}/api/car-content/USER_MANUAL/{model_code}/AT/{build}"
+    req = urllib.request.Request(url, headers={"User-Agent": UA}, method="HEAD")
+    try:
+        with urllib.request.urlopen(req, timeout=20) as response:
+            return 200 <= response.status < 300
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            return False
+        raise
+
+
+def _manual_builds_to_models(manuals: list, model_code: str) -> list:
+    by_build = {}
+    for manual in manuals:
+        try:
+            internal = int(manual.get("spaceSoftwareVersion"))
+        except (TypeError, ValueError):
+            continue
+        car = manual.get("carSoftwareVersion")
+        label = str(car).strip() if car is not None and str(car) != str(internal) else None
+        by_build[internal] = {
+            "internalVersion": internal,
+            **({"carVersion": label} if label else {}),
+        }
+    return [{"modelCode": str(model_code), "softwareVersions": sorted(
+        by_build.values(), key=lambda item: item["internalVersion"]
+    )}]
+
+
+def fetch_api_pipeline(model_code: str, published_max: int | None) -> list:
+    """Use the public models feed, then USER_MANUAL build probing if it is empty."""
+    if published_max is None:
+        return []
+    try:
+        doc = fetch_api_json(AVAILABLE_MODELS_PATH)
+        models = doc if isinstance(doc, list) else doc.get("models") or doc.get("carModels") or []
+        model = next((m for m in models if str(m.get("modelCode")) == str(model_code)), None)
+        versions = model.get("softwareVersions", []) if model else []
+        if versions:
+            return [
+                {"internal_version": int(v["internalVersion"]),
+                 "version": v.get("carVersion")}
+                for v in sorted(versions, key=lambda x: int(x.get("internalVersion", 0)))
+                if int(v.get("internalVersion", 0)) > published_max
+            ]
+    except Exception as exc:
+        print(f"Available-models feed unavailable for {model_code}: {exc}", file=sys.stderr)
+
+    try:
+        base = API_BASES[0]
+        candidates = _manual_probe_builds(published_max)
+        with __import__("concurrent.futures").futures.ThreadPoolExecutor(max_workers=8) as pool:
+            hits = [b for b, exists in zip(
+                candidates, pool.map(lambda b: _probe_manual_build(base, model_code, b), candidates)
+            ) if exists]
+        manuals = [fetch_api_json(f"/api/car-content/USER_MANUAL/{model_code}/AT/{b}")
+                   for b in [*hits, "99.0.0"]]
+        models = _manual_builds_to_models(manuals, model_code)
+        model = models[0]
+        return [
+            {"internal_version": int(v["internalVersion"]),
+             "version": v.get("carVersion")}
+            for v in model["softwareVersions"]
+            if int(v["internalVersion"]) > published_max
+        ]
+    except Exception as exc:
+        print(f"USER_MANUAL build probe unavailable for {model_code}: {exc}", file=sys.stderr)
+        return []
+
+
+def attach_api_build_numbers(versions: list, model_code: str, published_max: int | None) -> list:
+    """Attach registered YYWW build numbers to release versions by normalized label."""
+    if published_max is None:
+        return versions
+    pipeline = fetch_api_pipeline(model_code, published_max)
+    # Pipeline contains only unpublished builds; query the published max separately
+    # through USER_MANUAL so its label/build pair can be matched to release notes.
+    try:
+        latest = fetch_api_json(f"/api/car-content/USER_MANUAL/{model_code}/AT/99.0.0")
+        models = _manual_builds_to_models([latest], model_code)
+        records = models[0]["softwareVersions"]
+    except Exception:
+        records = []
+    by_key = {
+        ".".join(re.findall(r"\\d+", str(v.get("carVersion", "")))): v["internalVersion"]
+        for v in records if v.get("carVersion")
+    }
+    return [
+        {**v, **({"internal_version": by_key[".".join(re.findall(r"\\d+", v["version"]))]}
+                 if ".".join(re.findall(r"\\d+", v["version"])) in by_key else {})}
+        for v in versions
+    ]
 
 
 def validate_model_versions(versions: list, cached: list | None = None) -> None:
@@ -564,10 +701,13 @@ def scrape_model(model: dict, local: str | None):
     api_error = None
     if model.get("source") == "api":
         try:
-            versions = fetch_api_versions(model["model_code"])
+            versions, space = fetch_api_versions(model["model_code"])
             validate_model_versions(versions, cached)
             meta["source_used"] = "api"
             meta["api_model_code"] = model["model_code"]
+            meta["space_software_version"] = space
+            versions = attach_api_build_numbers(versions, model["model_code"], space)
+            meta["upcoming"] = fetch_api_pipeline(model["model_code"], space)
         except Exception as exc:
             api_error = exc
             print(f"  API source failed for {model['slug']}: {exc}", file=sys.stderr)
@@ -580,7 +720,7 @@ def scrape_model(model: dict, local: str | None):
             validate_model_versions(versions, cached)
             meta["source_used"] = "manual_fallback"
             meta["api_error"] = str(api_error)
-        meta["upcoming"] = []
+            meta["upcoming"] = []
     else:
         page = pathlib.Path(local).read_text(encoding="utf-8", errors="replace") if local else fetch(model["manual_url"])
         rn = extract_release_notes_object(page)
