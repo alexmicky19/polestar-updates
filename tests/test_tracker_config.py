@@ -26,7 +26,7 @@ class TrackerConfigurationTests(unittest.TestCase):
         expected = {
             "polestar-2": ("html", None),
             "polestar-3": ("api", "359"),
-            "polestar-4": ("html", None),
+            "polestar-4": ("api", "814"),
             "polestar-5": ("html", None),
         }
         actual = {
@@ -43,9 +43,16 @@ class TrackerConfigurationTests(unittest.TestCase):
                 self.assertTrue(model.get("model_code"))
 
     def test_api_uses_current_host_with_legacy_fallback(self):
-        self.assertIn('"https://support-car-content.volvo.care"', self.scraper)
         self.assertIn('"https://support-car-content.polestar.volvo.care"', self.scraper)
+        self.assertNotIn('"https://support-car-content.volvo.care"', self.scraper)
         self.assertIn("for base in API_BASES:", self.scraper)
+
+    def test_polestar_4_api_is_primary_and_manual_is_fallback(self):
+        self.assertIn('"model_code": "814"', self.scraper)
+        self.assertIn('meta["source_used"] = "api"', self.scraper)
+        self.assertIn('meta["source_used"] = "manual_fallback"', self.scraper)
+        self.assertIn("parse_api_release_notes", self.scraper)
+        self.assertIn("market_specific", self.scraper)
 
     def test_partial_scrapes_preserve_data_without_discarding_successes(self):
         self.assertIn("successful_models += 1", self.scraper)
