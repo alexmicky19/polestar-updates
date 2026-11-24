@@ -42,7 +42,7 @@ class TrackerConfigurationTests(unittest.TestCase):
             if model["source"] == "api":
                 self.assertTrue(model.get("model_code") or model.get("discover_model_code"))
 
-    def test_api_uses_current_host_with_legacy_fallback(self):
+    def test_api_uses_verified_host_only(self):
         self.assertIn('"https://support-car-content.polestar.volvo.care"', self.scraper)
         self.assertNotIn('"https://support-car-content.volvo.care"', self.scraper)
         self.assertIn("for base in API_BASES:", self.scraper)
