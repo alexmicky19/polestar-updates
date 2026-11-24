@@ -54,15 +54,15 @@ MODELS = [
         "slug": "polestar-5",
         "label": "Polestar 5",
         "source": "api",
-        "discover_model_code": True,
+        "model_code": "824",
         "manual_url": "https://www.polestar.com/uk/manual/polestar-5/2026/software-updates/",
     },
 ]
 
-# Public, unauthenticated Volvo/Polestar release-notes API. The reference P4
-# implementation uses this hostname. Keep it as the single verified host until
-# an alternative has been proven to serve the same API; do not guess hostnames.
-API_BASES = ("https://support-car-content.polestar.volvo.care",)
+# Public, unauthenticated Volvo/Polestar release-notes API. The current Volvo
+# support host is used by the live car-content release-notes endpoints. The old
+# Polestar-prefixed hostname no longer resolves on GitHub-hosted runners.
+API_BASES = ("https://support-car-content.volvo.care",)
 API_BASE = API_BASES[0]
 
 # Lists every model and the software versions Polestar has *registered* (incl. builds
@@ -337,23 +337,6 @@ def parse_api_release_notes(document: dict) -> list:
         if update.get("cms_version") is not None:
             update["internal_version"] = update["cms_version"]
     return updates
-
-
-def discover_api_model_code(model_label: str) -> str:
-    """Discover a model code from the public models feed when no code is configured."""
-    doc = fetch_api_json(AVAILABLE_MODELS_PATH)
-    models = doc if isinstance(doc, list) else doc.get("models") or doc.get("carModels") or []
-    match = next(
-        (item for item in models
-         if model_label.lower() in str(item.get("name") or item.get("modelName") or "").lower()
-         and item.get("modelCode") is not None),
-        None,
-    )
-    if not match:
-        raise RuntimeError(
-            f"available-car-models did not expose a model code for {model_label}"
-        )
-    return str(match["modelCode"])
 
 
 def fetch_api_versions(model_code: str) -> tuple[list, int | None]:
@@ -723,8 +706,6 @@ def scrape_model(model: dict, local: str | None):
     if model.get("source") == "api":
         try:
             model_code = model.get("model_code")
-            if not model_code and model.get("discover_model_code"):
-                model_code = discover_api_model_code(model["label"])
             if not model_code:
                 raise RuntimeError(f"no verified API model code configured for {model['label']}")
             versions, space = fetch_api_versions(model_code)
