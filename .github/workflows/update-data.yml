@@ -41,7 +41,7 @@ jobs:
           # so the notifier can open one issue per new release (not per reworded note).
           new_json=$(python3 - <<'PY'
           import json, subprocess, pathlib, re
-          MODELS = {"polestar-2": "Polestar 2", "polestar-3": "Polestar 3"}
+          MODELS = {"polestar-2": "Polestar 2", "polestar-3": "Polestar 3", "polestar-4": "Polestar 4", "polestar-5": "Polestar 5"}
           new = []
           for slug, label in MODELS.items():
               p = pathlib.Path(f"data/{slug}.json")
@@ -93,6 +93,8 @@ jobs:
             const manuals = {
               'polestar-2': 'https://www.polestar.com/uk/manual/polestar-2/2027/software-updates/',
               'polestar-3': 'https://www.polestar.com/uk/manual/polestar-3/2025/software-updates/',
+              'polestar-4': 'https://www.polestar.com/uk/manual/polestar-4/2026/software-updates/',
+              'polestar-5': 'https://www.polestar.com/uk/manual/polestar-5/2026/software-updates/',
             };
             for (const nv of news) {
               const data = JSON.parse(fs.readFileSync(`data/${nv.slug}.json`, 'utf8'));
