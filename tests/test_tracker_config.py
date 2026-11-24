@@ -24,17 +24,16 @@ class TrackerConfigurationTests(unittest.TestCase):
 
     def test_all_four_models_are_configured(self):
         expected = {
-            "polestar-2": None,
+            "polestar-2": ("html", None),
             "polestar-3": ("api", "359"),
             "polestar-4": ("html", None),
             "polestar-5": ("html", None),
         }
         actual = {
             model["slug"]: (model["source"], model.get("model_code"))
-            for model in self.models if model["slug"] != "polestar-2"
+            for model in self.models
         }
         self.assertEqual(actual, expected)
-        self.assertEqual(next(m["source"] for m in self.models if m["slug"] == "polestar-2"), "html")
 
     def test_model_sources_and_manual_urls_are_valid(self):
         for model in self.models:
