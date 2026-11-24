@@ -23,6 +23,7 @@ date this tracker first observed it — the same approach as the Polestar 4 trac
 No browser / heavy deps required — just urllib from the stdlib.
 """
 import json, re, sys, urllib.request, urllib.error, pathlib, html as _html, datetime, socket, time
+from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlparse
 
 # Each model: slug used in filenames/URLs, human label, data source, and its manual
@@ -332,6 +333,8 @@ def parse_api_release_notes(document: dict) -> list:
         del update["_gates"]
         if specific:
             update["market_specific"] = specific
+        if update.get("cms_version") is not None:
+            update["internal_version"] = update["cms_version"]
     return updates
 
 
@@ -435,7 +438,7 @@ def fetch_api_pipeline(model_code: str, published_max: int | None) -> list:
     try:
         base = API_BASES[0]
         candidates = _manual_probe_builds(published_max)
-        with __import__("concurrent.futures").futures.ThreadPoolExecutor(max_workers=8) as pool:
+        with ThreadPoolExecutor(max_workers=8) as pool:
             hits = [b for b, exists in zip(
                 candidates, pool.map(lambda b: _probe_manual_build(base, model_code, b), candidates)
             ) if exists]
