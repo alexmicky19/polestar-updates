@@ -37,11 +37,13 @@ every version is dated by **"First tracked"** — when this tracker first observ
   hostname as a fallback. Each version carries a `cmsSoftwareVersion` **build-week
   code** in `YYWW` form (e.g. `26380` → 2026, ISO week 38). This is when the build
   was **registered**, not released, so it is shown for traceability only.
-- **Polestar 4 and 5** — scraped directly from their official
-  [Polestar 4](https://www.polestar.com/uk/manual/polestar-4/2026/software-updates/) and
-  [Polestar 5](https://www.polestar.com/uk/manual/polestar-5/2026/software-updates/)
-  software-update manual pages. This avoids depending on the legacy API hostname
-  for these models and uses the release history Polestar publishes to owners.
+- **Polestar 4** — primary source is the public release-notes JSON API
+  (model code `814`), using structured note parsing and market/config validity gates.
+  Its official manual page is used only if the API fails or its response fails validation.
+- **Polestar 5** — remains on the manual parser for now because its API model code has
+  not yet been independently verified. It should be switched to API-first only after
+  the model code and manifest are confirmed; the manual remains its verified source
+  until then.
 
 Neither source has a true release-date field, so `first_seen` is the honest signal —
 the same approach as the reference
@@ -72,10 +74,10 @@ and registered-build metadata through this scraper.
 Everything is driven by the `MODELS` list at the top of `scripts/scrape.py`. Each
 entry has a `slug`, `label`, `manual_url`, and a `source`:
 
-- `"source": "html"` — HTML-scrape the `manual_url` (like Polestar 2).
-- `"source": "api"` — read the JSON API; also set `"model_code"` (Polestar 3 = 359).
-  Use the official manual's HTML source for models whose software history is published
-  directly on the manual page (currently Polestar 2, 4 and 5).
+- `"source": "html"` — HTML-scrape the `manual_url` (Polestar 2 and currently P5).
+- `"source": "api"` — read the JSON API; set `"model_code"` (P3 = 359, P4 = 814).
+  API models automatically fall back to the manual only after API fetch or validation
+  failure. Add P5 here once its API model code is independently verified.
 
 Add a new model there and the scraper produces `data/<slug>.json` +
 `feed-<slug>.xml`, the page grows a new toggle tab, and the notifier workflow covers
