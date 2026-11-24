@@ -52,8 +52,9 @@ the same approach as the reference
 
 For API-sourced models, the tracker mirrors the build-code and forecast signals
 from the reference [Polestar 4 tracker](https://jaybizzle.github.io/polestar4-updates).
-Polestar 2 and currently Polestar 5 do not expose the same build-code
-and registered-build metadata through this scraper.
+Polestar 2 does not expose the same build-code and registered-build metadata.
+Polestar 5 receives it only if API model-code discovery succeeds; otherwise it uses
+the manual fallback and retains no API build metadata.
 
 - **Build code on every version** — the raw `YYWW` code shown for traceability, e.g.
   `build 26380 · 2026 wk 38`.
