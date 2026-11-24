@@ -297,7 +297,7 @@ def parse_api_release_notes(document: dict) -> list:
         title_node = next((n for n in children if isinstance(n, dict) and n.get("type") == "title"), None)
         title_children = title_node.get("children", []) if title_node else []
         title = "".join(x for x in title_children if isinstance(x, str))
-        match = re.search(r"Software Version\\s+(.+?)\\s*:?\\s*$", title, re.I)
+        match = re.search(r"Software Version\s+(.+?)\s*:?\s*$", title, re.I)
         if match:
             version = match.group(1).strip()
             current = next((u for u in updates if u["version"] == version), None)
