@@ -9,9 +9,10 @@ Two data sources, chosen per model via its `source` field:
   contains a `releaseNotes.content.body` structure. We fetch the HTML, isolate that
   object by balanced-brace scanning, and walk it into a flat list of {version,
   notes[]}. P2 is not exposed by the JSON API, so it stays HTML-scraped.
-- "api" (Polestar 3): the manual page is backed by a public, unauthenticated JSON
+- "api" (Polestar 3 and Polestar 4): the manual page is backed by a public JSON
   API. We resolve the en-GB release-notes document and read structured segments,
-  each carrying a `cmsSoftwareVersion` YYWW build-week code (shown for traceability).
+  including market/config validity gates. The public manual is only a last-resort
+  fallback when the API cannot be fetched or fails validation.
 
 Polestar publishes no true release *date* in either source. The `cmsSoftwareVersion`
 build-week code is *not* a release date — it's when the build was registered, and it
@@ -44,7 +45,8 @@ MODELS = [
     {
         "slug": "polestar-4",
         "label": "Polestar 4",
-        "source": "html",
+        "source": "api",
+        "model_code": "814",
         "manual_url": "https://www.polestar.com/uk/manual/polestar-4/2026/software-updates/",
     },
     {
@@ -55,14 +57,10 @@ MODELS = [
     },
 ]
 
-# Public, unauthenticated Volvo/Polestar release-notes API. Polestar's old
-# polestar-prefixed hostname stopped resolving on GitHub-hosted runners in Nov 2026.
-# Prefer the current Volvo support host and retain the old host as a compatibility
-# fallback in case the service is regionally migrated.
-API_BASES = (
-    "https://support-car-content.volvo.care",
-    "https://support-car-content.polestar.volvo.care",
-)
+# Public, unauthenticated Volvo/Polestar release-notes API. The reference P4
+# implementation uses this hostname. Keep it as the single verified host until
+# an alternative has been proven to serve the same API; do not guess hostnames.
+API_BASES = ("https://support-car-content.polestar.volvo.care",)
 API_BASE = API_BASES[0]
 
 # Lists every model and the software versions Polestar has *registered* (incl. builds
@@ -228,21 +226,132 @@ def parse_versions(rn: dict) -> list:
 
 
 def fetch_api_json(path_or_url: str) -> dict:
-    """GET JSON from the API. Accepts an absolute URL or an API path (with or
-    without a leading slash); follows redirects (the content host 303-redirects to
-    an internal mirror)."""
+    """GET JSON from the verified Polestar car-content API host."""
     if path_or_url.startswith("http"):
         return json.loads(fetch(path_or_url))
-
     path = "/" + path_or_url.lstrip("/")
     errors = []
     for base in API_BASES:
-        url = base + path
         try:
-            return json.loads(fetch(url))
+            return json.loads(fetch(base + path))
         except Exception as exc:
             errors.append(f"{base}: {exc}")
-    raise RuntimeError("All Polestar API hosts failed: " + " | ".join(errors))
+    raise RuntimeError("Polestar API request failed: " + " | ".join(errors))
+
+
+def positive_gates(expr) -> list:
+    """Return positive market/config atoms; negated-only gates are broad."""
+    if expr is None or expr == "true":
+        return []
+    atoms = re.sub(r"[()]", " ", str(expr)).replace("|", "&").split("&")
+    return [atom.strip() for atom in atoms
+            if atom.strip() and not atom.strip().startswith("!")]
+
+
+def _flatten_api_notes(node, out: list, inherited=None) -> None:
+    """Flatten API rich-text nodes while retaining validities/features gates."""
+    inherited = inherited or {"validities": None, "features": None}
+    if isinstance(node, str):
+        text = re.sub(r"\\s+", " ", node).strip()
+        if text:
+            out.append({"text": text, **inherited})
+        return
+    if isinstance(node, list):
+        for child in node:
+            _flatten_api_notes(child, out, inherited)
+        return
+    if not isinstance(node, dict) or node.get("type") in {"title", "footnote"}:
+        return
+    gates = {
+        "validities": node.get("validities", inherited["validities"]),
+        "features": node.get("features", inherited["features"]),
+    }
+    children = node.get("children")
+    if isinstance(children, str):
+        text = re.sub(r"\\s+", " ", children).strip()
+        if text and node.get("type") in {"paragraph", "listItem", "listIntro"}:
+            out.append({"text": text, **gates})
+        return
+    _flatten_api_notes(children, out, gates)
+
+
+def parse_api_release_notes(document: dict) -> list:
+    """Parse version segments and annotate notes restricted to markets/configs."""
+    body = document.get("releaseNotesDocument", {}).get("body", [])
+    updates, current = [], None
+    for segment in body:
+        if not isinstance(segment, dict):
+            continue
+        children = segment.get("children") or []
+        title_node = next((n for n in children if isinstance(n, dict) and n.get("type") == "title"), None)
+        title_children = title_node.get("children", []) if title_node else []
+        title = "".join(x for x in title_children if isinstance(x, str))
+        match = re.search(r"Software Version\\s+(.+?)\\s*:?\\s*$", title, re.I)
+        if match:
+            version = match.group(1).strip()
+            current = next((u for u in updates if u["version"] == version), None)
+            if current is None:
+                current = {"version": version, "notes": [], "_gates": {}}
+                updates.append(current)
+        if current is None:
+            continue
+        inherited = {
+            "validities": segment.get("validities"),
+            "features": segment.get("features"),
+        }
+        lines = []
+        _flatten_api_notes(children, lines, inherited)
+        for line in lines:
+            note = line["text"]
+            if note not in current["notes"]:
+                current["notes"].append(note)
+            current["_gates"].setdefault(note, []).append(line)
+
+    for update in updates:
+        specific = []
+        for note in update["notes"]:
+            occurrences = update["_gates"].get(note, [])
+            if occurrences and all(
+                positive_gates(o.get("validities")) or positive_gates(o.get("features"))
+                for o in occurrences
+            ):
+                specific.append(note)
+        del update["_gates"]
+        if specific:
+            update["market_specific"] = specific
+    return updates
+
+
+def fetch_api_versions(model_code: str) -> list:
+    """Fetch cumulative release notes and resolve the en-GB document."""
+    manifest = fetch_api_json(
+        f"/api/car-content/SOFTWARE_RELEASE_NOTES/{model_code}/UNTIL/99.0.0"
+    )
+    entries = manifest.get("content") or []
+    if not entries:
+        raise RuntimeError(f"API manifest for model {model_code} has no content entries")
+    entry = next(
+        (item for item in entries
+         if (item.get("language") or item.get("locale") or "").lower() in ("en-gb", "en_gb", "en")),
+        entries[0],
+    )
+    relative_url = entry.get("relativeUrl")
+    if not relative_url:
+        raise RuntimeError(f"API manifest for model {model_code} has no relativeUrl")
+    return parse_api_release_notes(fetch_api_json(relative_url))
+
+
+def validate_model_versions(versions: list, cached: list | None = None) -> None:
+    """Reject empty or suspiciously truncated source responses before accepting them."""
+    if not versions:
+        raise RuntimeError("source returned zero software versions")
+    empty = next((v for v in versions if not v.get("notes")), None)
+    if empty:
+        raise RuntimeError(f"version {empty.get('version')} has no parsed notes")
+    if cached and len(versions) < max(1, len(cached) // 2):
+        raise RuntimeError(
+            f"source version count collapsed from {len(cached)} to {len(versions)}"
+        )
 
 
 def _seg_version(seg: dict) -> str | None:
@@ -444,14 +553,40 @@ def scrape_model(model: dict, local: str | None):
     release date, and populate meta with `space_software_version` and the `upcoming`
     pipeline (builds registered but not yet published)."""
     meta: dict = {}
+    cached_path = DATA_DIR / f"{model['slug']}.json"
+    cached = []
+    if cached_path.exists():
+        try:
+            cached = json.loads(cached_path.read_text(encoding="utf-8"))
+        except Exception:
+            cached = []
+
+    api_error = None
     if model.get("source") == "api":
-        versions, space = fetch_api_versions(model["model_code"])
-        meta["space_software_version"] = space
-        meta["upcoming"] = fetch_api_pipeline(model["model_code"], space)
+        try:
+            versions = fetch_api_versions(model["model_code"])
+            validate_model_versions(versions, cached)
+            meta["source_used"] = "api"
+            meta["api_model_code"] = model["model_code"]
+        except Exception as exc:
+            api_error = exc
+            print(f"  API source failed for {model['slug']}: {exc}", file=sys.stderr)
+            versions = None
+        # The manual is a last-resort live source, never the first choice for API models.
+        if versions is None:
+            page = pathlib.Path(local).read_text(encoding="utf-8", errors="replace") if local else fetch(model["manual_url"])
+            rn = extract_release_notes_object(page)
+            versions = parse_versions(rn)
+            validate_model_versions(versions, cached)
+            meta["source_used"] = "manual_fallback"
+            meta["api_error"] = str(api_error)
+        meta["upcoming"] = []
     else:
         page = pathlib.Path(local).read_text(encoding="utf-8", errors="replace") if local else fetch(model["manual_url"])
         rn = extract_release_notes_object(page)
         versions = parse_versions(rn)
+        validate_model_versions(versions, cached)
+        meta["source_used"] = "manual"
     if not versions:
         raise SystemExit(f"parsed zero versions for {model['slug']} — aborting so we don't wipe good data")
 
