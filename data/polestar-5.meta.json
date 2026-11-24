@@ -1,1 +1,5 @@
-{}
+{
+ "source_used": "manual_fallback",
+ "api_error": "Polestar API request failed: https://support-car-content.volvo.care: <urlopen error [Errno -2] Name or service not known>",
+ "upcoming": []
+}
