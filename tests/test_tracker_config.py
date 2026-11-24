@@ -25,15 +25,16 @@ class TrackerConfigurationTests(unittest.TestCase):
     def test_all_four_models_are_configured(self):
         expected = {
             "polestar-2": None,
-            "polestar-3": "359",
-            "polestar-4": "814",
-            "polestar-5": "824",
+            "polestar-3": ("api", "359"),
+            "polestar-4": ("html", None),
+            "polestar-5": ("html", None),
         }
         actual = {
-            model["slug"]: model.get("model_code")
-            for model in self.models
+            model["slug"]: (model["source"], model.get("model_code"))
+            for model in self.models if model["slug"] != "polestar-2"
         }
         self.assertEqual(actual, expected)
+        self.assertEqual(next(m["source"] for m in self.models if m["slug"] == "polestar-2"), "html")
 
     def test_model_sources_and_manual_urls_are_valid(self):
         for model in self.models:
@@ -41,6 +42,16 @@ class TrackerConfigurationTests(unittest.TestCase):
             self.assertIn(model["slug"], model["manual_url"])
             if model["source"] == "api":
                 self.assertTrue(model.get("model_code"))
+
+    def test_api_uses_current_host_with_legacy_fallback(self):
+        self.assertIn('"https://support-car-content.volvo.care"', self.scraper)
+        self.assertIn('"https://support-car-content.polestar.volvo.care"', self.scraper)
+        self.assertIn("for base in API_BASES:", self.scraper)
+
+    def test_partial_scrapes_preserve_data_without_discarding_successes(self):
+        self.assertIn("successful_models += 1", self.scraper)
+        self.assertIn("::warning title=Partial Polestar scrape::", self.scraper)
+        self.assertIn("if successful_models == 0:", self.scraper)
 
     def test_generated_page_contains_every_model(self):
         data_match = re.search(r"^const DATA = (.*);$", self.index, re.MULTILINE)
