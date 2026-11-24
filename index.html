@@ -6,7 +6,9 @@
 <title>Polestar Software Updates — Unofficial Tracker</title>
 <meta name="description" content="Tracking Polestar 2, 3, 4 and 5 software updates: every released version and its official release notes, sourced from Polestar's owner's manuals.">
 <link rel="alternate" type="application/rss+xml" title="Polestar 2 software updates" href="feed-polestar-2.xml">
-<link rel="alternate" type="application/rss+xml" title="Polestar 3 software updates" href="feed-polestar-3.xml">\n<link rel="alternate" type="application/rss+xml" title="Polestar 4 software updates" href="feed-polestar-4.xml">\n<link rel="alternate" type="application/rss+xml" title="Polestar 5 software updates" href="feed-polestar-5.xml">
+<link rel="alternate" type="application/rss+xml" title="Polestar 3 software updates" href="feed-polestar-3.xml">
+<link rel="alternate" type="application/rss+xml" title="Polestar 4 software updates" href="feed-polestar-4.xml">
+<link rel="alternate" type="application/rss+xml" title="Polestar 5 software updates" href="feed-polestar-5.xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
@@ -39,10 +41,10 @@
   .lede a:hover{border-color:var(--ink)}
 
   /* model toggle */
-  .modeltabs{display:inline-flex;gap:0;background:var(--card);border:1px solid var(--ink);border-radius:var(--radius);padding:0;margin:26px 0 4px}
+  .modeltabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:min(100%,560px);gap:0;background:var(--card);border:1px solid var(--ink);border-radius:var(--radius);padding:0;margin:26px 0 4px}
   .modeltabs button{
-    font-family:var(--font);font-size:14px;font-weight:500;color:var(--ink);
-    background:transparent;border:none;border-radius:0;padding:11px 26px;cursor:pointer;transition:all .15s ease;
+    font-family:var(--font);font-size:13px;font-weight:500;color:var(--ink);
+    background:transparent;border:none;border-radius:0;padding:11px 10px;cursor:pointer;transition:all .15s ease;
   }
   .modeltabs button + button{border-left:1px solid var(--ink)}
   .modeltabs button:hover{background:var(--ok-soft)}
@@ -157,7 +159,7 @@
   </div>
 
   <div class="note-box">
-    <b>About dates:</b> Polestar does <b>not</b> publish an explicit release date for software, so every version is dated by <b>"First tracked"</b> — the date this tracker first observed it online. For Polestar&nbsp;3 (sourced from Polestar's release-notes API) each version also carries a <b>build-week code</b> (shown as <b>build&nbsp;YYWWW</b>) — this is when the build was registered, which leads the public rollout by a week or two, so it is shown for traceability only, not as a release date. The <b>predicted next update</b> for Polestar&nbsp;3, 4 and 5 is a statistical estimate from the median gap between past observed releases, not an announcement. Exact rollout still varies by market and model year.
+    <b>About dates:</b> Polestar does <b>not</b> publish an explicit release date for software, so every version is dated by <b>"First tracked"</b> — the date this tracker first observed it online. For API-sourced models (Polestar&nbsp;3, 4 and 5), each version also carries a <b>build-week code</b> (shown as <b>build&nbsp;YYWWW</b>) — this is when the build was registered, which leads the public rollout by a week or two, so it is shown for traceability only, not as a release date. The <b>predicted next update</b> for Polestar&nbsp;3, 4 and 5 is a statistical estimate from the median gap between past observed releases, not an announcement. Exact rollout still varies by market and model year.
   </div>
 
   <details class="upcoming" id="upcoming" style="display:none"></details>
