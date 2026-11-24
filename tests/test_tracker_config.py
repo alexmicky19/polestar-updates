@@ -38,7 +38,7 @@ class TrackerConfigurationTests(unittest.TestCase):
     def test_model_sources_and_manual_urls_are_valid(self):
         for model in self.models:
             self.assertIn(model["source"], {"html", "api"})
-            self.assertIn(model["slug"].replace("-", "/"), model["manual_url"])
+            self.assertIn(model["slug"], model["manual_url"])
             if model["source"] == "api":
                 self.assertTrue(model.get("model_code"))
 
