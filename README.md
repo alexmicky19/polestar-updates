@@ -47,12 +47,12 @@ Neither source has a true release-date field, so `first_seen` is the honest sign
 the same approach as the reference
 [Polestar 4 tracker](https://jaybizzle.github.io/polestar4-updates).
 
-### Build codes, cadence & forecast (API-sourced models)
+### Build codes, cadence & forecast (Polestar 3)
 
-For API-sourced models the tracker mirrors the three signals the reference
-[Polestar 4 tracker](https://jaybizzle.github.io/polestar4-updates) shows. These apply to
-**Polestar 3, 4 and 5** — Polestar 2 is HTML-scraped, has no build codes and no registered
-version list, so its rows and banner are unchanged.
+For the API-sourced Polestar 3, the tracker mirrors the build-code and forecast signals
+from the reference [Polestar 4 tracker](https://jaybizzle.github.io/polestar4-updates).
+Polestar 2, 4 and 5 are sourced from their manuals and do not expose the same build-code
+and registered-build metadata through this scraper.
 
 - **Build code on every version** — the raw `YYWW` code shown for traceability, e.g.
   `build 26380 · 2026 wk 38`.
@@ -65,8 +65,7 @@ version list, so its rows and banner are unchanged.
   cadence, not an announced date.
 - **In the pipeline** — builds Polestar has *registered* in `available-car-models`
   but not yet published notes for (`internalVersion` greater than the manifest's
-  `spaceSoftwareVersion`). This section is hidden when empty — which is the case
-  whenever the newest registered build is already the newest published one.
+  `spaceSoftwareVersion`). This section is hidden when empty.
 
 ## Adding another model
 
