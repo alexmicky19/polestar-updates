@@ -53,7 +53,8 @@ MODELS = [
     {
         "slug": "polestar-5",
         "label": "Polestar 5",
-        "source": "html",
+        "source": "api",
+        "discover_model_code": True,
         "manual_url": "https://www.polestar.com/uk/manual/polestar-5/2026/software-updates/",
     },
 ]
@@ -336,6 +337,23 @@ def parse_api_release_notes(document: dict) -> list:
         if update.get("cms_version") is not None:
             update["internal_version"] = update["cms_version"]
     return updates
+
+
+def discover_api_model_code(model_label: str) -> str:
+    """Discover a model code from the public models feed when no code is configured."""
+    doc = fetch_api_json(AVAILABLE_MODELS_PATH)
+    models = doc if isinstance(doc, list) else doc.get("models") or doc.get("carModels") or []
+    match = next(
+        (item for item in models
+         if model_label.lower() in str(item.get("name") or item.get("modelName") or "").lower()
+         and item.get("modelCode") is not None),
+        None,
+    )
+    if not match:
+        raise RuntimeError(
+            f"available-car-models did not expose a model code for {model_label}"
+        )
+    return str(match["modelCode"])
 
 
 def fetch_api_versions(model_code: str) -> tuple[list, int | None]:
@@ -704,13 +722,18 @@ def scrape_model(model: dict, local: str | None):
     api_error = None
     if model.get("source") == "api":
         try:
-            versions, space = fetch_api_versions(model["model_code"])
+            model_code = model.get("model_code")
+            if not model_code and model.get("discover_model_code"):
+                model_code = discover_api_model_code(model["label"])
+            if not model_code:
+                raise RuntimeError(f"no verified API model code configured for {model['label']}")
+            versions, space = fetch_api_versions(model_code)
             validate_model_versions(versions, cached)
             meta["source_used"] = "api"
-            meta["api_model_code"] = model["model_code"]
+            meta["api_model_code"] = model_code
             meta["space_software_version"] = space
-            versions = attach_api_build_numbers(versions, model["model_code"], space)
-            meta["upcoming"] = fetch_api_pipeline(model["model_code"], space)
+            versions = attach_api_build_numbers(versions, model_code, space)
+            meta["upcoming"] = fetch_api_pipeline(model_code, space)
         except Exception as exc:
             api_error = exc
             print(f"  API source failed for {model['slug']}: {exc}", file=sys.stderr)
