@@ -6,7 +6,7 @@
     <atom:link href="https://alexmicky19.github.io/polestar-updates/feed-polestar-3.xml" rel="self" type="application/rss+xml"/>
     <description>New Polestar 3 software versions and their release notes, sourced from Polestar's owner's manual. Unofficial.</description>
     <language>en-GB</language>
-    <lastBuildDate>Mon, 16 Nov 2026 16:59:19 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 24 Nov 2026 14:18:16 +0000</lastBuildDate>
     <item>
       <title>Polestar 3 software P3.2.12</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P3-2-12</link>
@@ -17,13 +17,7 @@
 • Updates to Surround view in the driver display, now including and displaying surrounding pedestrians, trucks, bicyclists and mopeds.
 • Turn off all the exterior lights while parked is introduced and can be accessed through the centre display.
 • Improvements to creep function, with creep activated the car will now start to roll once you’ve released the foot from the brake pedal or by a slight touch on the accelerator.
-• With this software version installed you will be able to initiate or schedule upcoming over the air updates through the centre display or your Polestar app.
-• Improvements to the Polestar app connectivity, you will now be able to see the cabin temperature in Polestar app when activating the parking climatisation.
-• Private locking of the glove box is introduced. You can now select and activate a pin code to be required before you access the glove box.
-• Trailer lamp check is introduced and can be accessed through the centre display when a compatible trailer is connected to your Polestar 3. The lamp check triggers the trailer lights to light up in sequence to easily be checked.
-• Manual front seat calibration is now available, see Polestar 3 manual for further details.
-• Connectivity improvements for AppleCar play.
-• Bug fix for when locking sound was still audible when turned off the sound is now turned off when selected.</description>
+• With this software version installed you will be able to initiate or schedule upcoming over the air updates through the centre display or your Polestar app.</description>
     </item>
     <item>
       <title>Polestar 3 software P3.0.35</title>
@@ -74,7 +68,6 @@
 Additional improvements:
 • Improvements to Exit Assist, now including a temporary prevention of opening the door – in addition to an audible and visual warning – if pedestrians, bicycles, or other vehicles approaching from the rear are detected. A double pull of the door latch will override the temporary hold.
 • Previously, Exit Assist only provided an audible and visual warning when detecting objects approaching from the rear.
-• Improvements to Connected Safety, with the function now extended to provide warnings for large animals and roadworks ahead.
 • Improvements to Apple CarPlay, now supporting Dolby Atmos, delivering a more immersive and directional sound experience when supported content is played.
 • Improvements to the foot-operated tailgate, including overall robustness and a longer activation time with extended audible feedback when closing the tailgate.
 • Improvements to rear wiper behaviour, including a shorter wiper cleaning interval reduced from 10 to 8 seconds, and automatic activation of the rear wiper when reversing if the front wipers are already active.
@@ -112,7 +105,6 @@ Bug fixes:
 Additional improvements:
 • Improvements to Exit Assist, now including a temporary prevention of opening the door – in addition to an audible and visual warning – if pedestrians, bicycles, or other vehicles approaching from the rear are detected. A double pull of the door latch will override the temporary hold.
 • Previously, Exit Assist only provided an audible and visual warning when detecting objects approaching from the rear.
-• Improvements to Connected Safety, with the function now extended to provide warnings for large animals and roadworks ahead
 • Improvements to Apple CarPlay, now supporting Dolby Atmos, delivering a more immersive and directional sound experience when supported content is played.
 • Improvements to the foot-operated tailgate, including overall robustness and a longer activation time with extended audible feedback when closing the tailgate.
 • Improvements to rear wiper behaviour, including a shorter wiper cleaning interval reduced from 10 to 8 seconds, and automatic activation of the rear wiper when reversing if the front wipers are already active.
@@ -151,15 +143,9 @@ Bug fixes:
       <guid isPermaLink="false">polestar-3-P2.1.22</guid>
       <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
       <description>• This software update provides general stability improvements to all Polestar 3 vehicles upgraded with the new core computer.
-• HomeLink is introduced. The HomeLink app allows the user to pair and control gate openers, such as garage doors, produced by HomeLink
 • As part of Pilot assist and Adaptive Cruise control, Adapt to speed limit is introduced. The Adapt to speed limit is a new function that allows the driver to accept or reject offers to adapt the set speed limit according to the updated roads’ speed limits
 • The driver can enable Adapt to speed limit in the driver settings menu
 • This functionality requires the vehicle to have Road Sign Information activated
-• Connected safety introduced, allowing information sharing between vehicles via a cloud service. The function is intended to make a driver aware there may be a potential traffic situation ahead. Connected Safety can inform the driver when the following hazards are detected beyond the visible horizon:
-• This is not the same functionality as provided via Google maps.
-• Accident ahead
-• Slippery road conditions
-• Vehicles with hazard lights activated
 • Time gap setting when using Adaptive cruise control or Pilot assist is introduced. The driver can select between three distance levels to vehicles ahead, in the centre display, improving comfort when using Adaptive cruise control or Pilot Assist.
 • Automatic folding and unfolding of exterior mirrors when locking and unlocking the car is introduced
 • Previously, it was only possible to manually fold and unfold the mirrors in settings
@@ -170,9 +156,6 @@ Bug fixes:
 • The driver and front seat passenger can speak naturally as their conversation is amplified through the car’s speakers, which adjusts the output volume at high speeds or with music playing
 • The function is available in three settings (low, medium and high) which adapt the overall volume for all needs, including for hearing impairments
 • In cars equipped with Bowers &amp; Wilkins for Polestar, additional rear microphones enable easy communication between front and rear seats improving this feature further
-• Bi-directional charging, V2H, for customers in California is introduced
-• This charging solution uses direct current (DC) and enables V2H (Vehicle to home) functionality for Polestar 3 on the 400V electrical architecture
-• The feature requires a bi-directional compatible DC-wall box available for Polestar 3 provided by Dcbel
 
 Additional improvements:
 • Improvements to high-voltage battery consumption when vehicle not in use, including prevention of battery consumption while keeping the car core system active over time while parked
@@ -199,13 +182,6 @@ Bug fixes:
 • Bug fix for when Google Maps would start in dark mode during daytime</description>
     </item>
     <item>
-      <title>Polestar 3 software P1.4.15</title>
-      <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-4-15</link>
-      <guid isPermaLink="false">polestar-3-P1.4.15</guid>
-      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
-      <description>• In line with our commitment to continuous improvement, this extra release includes refinements aimed at further improving the AC charging experience. While users may not notice any changes, these updates are part of our proactive approach to delivering key improvements as soon as they are available.</description>
-    </item>
-    <item>
       <title>Polestar 3 software P1.4.12</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-4-12</link>
       <guid isPermaLink="false">polestar-3-P1.4.12</guid>
@@ -217,17 +193,22 @@ Bug fixes:
 • Stability of internet connectivity has been improved, along with enhancements to how the vehicle manages temporary connection loss.
 • The GPS reliability has been improved to help prevent signal loss and drifting on the map.
 • Improvements to Digital Key unlocking functionality when approaching the car.
-• HD Radio improvements.
 • Apple CarPlay connectivity improved to more reliably reconnect during the next driving cycle. Previously, Apple CarPlay would not always reconnect as expected.</description>
+    </item>
+    <item>
+      <title>Polestar 3 software P1.3.18</title>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-3-18</link>
+      <guid isPermaLink="false">polestar-3-P1.3.18</guid>
+      <pubDate>Tue, 24 Nov 2026 00:00:00 +0000</pubDate>
+      <description>• Digital Key lock and unlock functionality improved
+• False occupant presence reminder sensitivity improvements</description>
     </item>
     <item>
       <title>Polestar 3 software P1.3.17</title>
       <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-3-17</link>
       <guid isPermaLink="false">polestar-3-P1.3.17</guid>
       <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
-      <description>• Digital Key lock and unlock functionality improved
-• False occupant presence reminder sensitivity improvements
-• Abbey Road Studios Mode introduced. It offers a listening experience inspired by the world-famous recording studio in London. With this audio mode you can choose between four new sound presets or adjust the sound spectrum as if you are the producer in the recording room and freely move around in it. (Only applicable with Bowers &amp; Wilkins audio system)
+      <description>• Abbey Road Studios Mode introduced. It offers a listening experience inspired by the world-famous recording studio in London. With this audio mode you can choose between four new sound presets or adjust the sound spectrum as if you are the producer in the recording room and freely move around in it. (Only applicable with Bowers &amp; Wilkins audio system)
 • Smart schedule for charging introduced.
 • Set a departure time at a certain location and the vehicle will use a smart schedule to ensure its charged and ready by the desired time of departure. The vehicle delays the charging start to protect your battery and reach the desired state of charge as late as possible prior to departure.
 • Curve Speed Assist introduced. CSA will reduce speed in curves to improve the driving experience when using pilot assist. The function has been added to the Assist menu in the car with ON/OFF settings.
@@ -239,7 +220,6 @@ Bug fixes:
 • Change in logic of parking assist camera to always show reverse camera view when vehicle is placed in reverse. Cars with Split screen view with 360-camera and rear-view camera will show the split screen when the vehicle is placed in reverse.
 • Bug fix for issue where the connection between a driver profile and a connected key would disappear after the vehicle has been parked for extended periods. . All key connections will now remain until they are manually removed from the driver profile.
 • Adaptive High beam improved for a quicker response time after a meeting scenario has occurred.
-• Fix for issue with Fahrenheit temperature reverting back to 62. (US market only)
 • NFC reader in door handle improved. By placing your fingers under the door handle, a reset will now be triggered which will re-enable the NFC-readers
 • Additional information now added to the HUD (Head-Up Display)
 • ACC/Pilot assist and Set speed is now shown in the HUD
@@ -255,15 +235,7 @@ Additional improvements:
 • Climate setting improvement to issue with settings not being available in the centre display
 • Improved sound when phone is connected via Bluetooth
 • Stability improvements to in-car connectivity in car
-• Infotainment system stability improvements
-• Stability improvements for AC charging. (US market only)</description>
-    </item>
-    <item>
-      <title>Polestar 3 software P1.2.16</title>
-      <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-2-16</link>
-      <guid isPermaLink="false">polestar-3-P1.2.16</guid>
-      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
-      <description>• General stability improvements.</description>
+• Infotainment system stability improvements</description>
     </item>
     <item>
       <title>Polestar 3 software P1.2.15</title>
@@ -365,10 +337,10 @@ Additional improvements:
       <description>• General stability improvements.</description>
     </item>
     <item>
-      <title>Polestar 3 software P1.0.4</title>
-      <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-0-4</link>
-      <guid isPermaLink="false">polestar-3-P1.0.4</guid>
-      <pubDate>Mon, 31 Aug 2026 00:00:00 +0000</pubDate>
+      <title>Polestar 3 software P1.0.3</title>
+      <link>https://alexmicky19.github.io/polestar-updates/#polestar-3-P1-0-3</link>
+      <guid isPermaLink="false">polestar-3-P1.0.3</guid>
+      <pubDate>Tue, 24 Nov 2026 00:00:00 +0000</pubDate>
       <description>• General stability improvements.</description>
     </item>
   </channel>

@@ -1,4 +1,5 @@
 {
- "space_software_version": 26460,
+ "source_used": "manual_fallback",
+ "api_error": "Polestar API request failed: https://support-car-content.polestar.volvo.care: <urlopen error [Errno -2] Name or service not known>",
  "upcoming": []
 }
