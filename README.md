@@ -39,10 +39,10 @@ every version is dated by **"First tracked"** — when this tracker first observ
 - **Polestar 4** — primary source is the public release-notes JSON API
   (model code `814`), using structured note parsing and market/config validity gates.
   Its official manual page is used only if the API fails or its response fails validation.
-- **Polestar 5** — remains on the manual parser for now because its API model code has
-  not yet been independently verified. It should be switched to API-first only after
-  the model code and manifest are confirmed; the manual remains its verified source
-  until then.
+- **Polestar 5** — attempts API model-code discovery through the public available-models
+  feed first. If that feed does not expose the model (it may be empty for anonymous
+  callers), the official manual is used only as the last-resort fallback. No model code
+  is guessed; once independently confirmed, it can be configured directly.
 
 Neither source has a true release-date field, so `first_seen` is the honest signal —
 the same approach as the reference
@@ -73,10 +73,11 @@ and registered-build metadata through this scraper.
 Everything is driven by the `MODELS` list at the top of `scripts/scrape.py`. Each
 entry has a `slug`, `label`, `manual_url`, and a `source`:
 
-- `"source": "html"` — HTML-scrape the `manual_url` (Polestar 2 and currently P5).
+- `"source": "html"` — HTML-scrape the `manual_url` (Polestar 2).
 - `"source": "api"` — read the JSON API; set `"model_code"` (P3 = 359, P4 = 814).
-  API models automatically fall back to the manual only after API fetch or validation
-  failure. Add P5 here once its API model code is independently verified.
+  For an unverified model code, set `"discover_model_code": True` to try the public
+  models feed first. API models fall back to the manual only after discovery, API fetch,
+  or validation fails.
 
 Add a new model there and the scraper produces `data/<slug>.json` +
 `feed-<slug>.xml`, the page grows a new toggle tab, and the notifier workflow covers
