@@ -74,7 +74,18 @@ jobs:
           # Human-readable commit summary of the latest version per model.
           # Only the per-model version lists (data/<slug>.json) — skip the
           # data/*.meta.json sidecars, which are objects, not version arrays.
-          summary=$(python3 -c "import json,glob,os; parts=[]; [parts.append(os.path.basename(f)[:-5]+' '+json.load(open(f))[0]['version']) for f in sorted(glob.glob('data/*.json')) if not f.endswith('.meta.json')]; print(', '.join(parts))")
+          summary=$(python3 - <<'PY'
+          import json, glob, os
+          parts = []
+          for path in sorted(glob.glob("data/*.json")):
+              if path.endswith(".meta.json"):
+                  continue
+              versions = json.load(open(path, encoding="utf-8"))
+              if versions:
+                  parts.append(os.path.basename(path)[:-5] + " " + versions[0]["version"])
+          print(", ".join(parts) or "no version data")
+          PY
+          )
           git commit -m "chore: update Polestar software data (${summary})"
           git push
 

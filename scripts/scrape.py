@@ -9,9 +9,10 @@ Two data sources, chosen per model via its `source` field:
   contains a `releaseNotes.content.body` structure. We fetch the HTML, isolate that
   object by balanced-brace scanning, and walk it into a flat list of {version,
   notes[]}. P2 is not exposed by the JSON API, so it stays HTML-scraped.
-- "api" (Polestar 3/4/5): the manual pages are backed by a public, unauthenticated JSON
+- "api" (Polestar 3 and Polestar 4): the manual page is backed by a public JSON
   API. We resolve the en-GB release-notes document and read structured segments,
-  each carrying a `cmsSoftwareVersion` YYWW build-week code (shown for traceability).
+  including market/config validity gates. The public manual is only a last-resort
+  fallback when the API cannot be fetched or fails validation.
 
 Polestar publishes no true release *date* in either source. The `cmsSoftwareVersion`
 build-week code is *not* a release date — it's when the build was registered, and it
@@ -22,6 +23,8 @@ date this tracker first observed it — the same approach as the Polestar 4 trac
 No browser / heavy deps required — just urllib from the stdlib.
 """
 import json, re, sys, urllib.request, urllib.error, pathlib, html as _html, datetime, socket, time
+from concurrent.futures import ThreadPoolExecutor
+from urllib.parse import urlparse
 
 # Each model: slug used in filenames/URLs, human label, data source, and its manual
 # URL. API models also carry a numeric `model_code`. Add a new model here (e.g.
@@ -51,13 +54,16 @@ MODELS = [
         "slug": "polestar-5",
         "label": "Polestar 5",
         "source": "api",
-        "model_code": "824",
+        "discover_model_code": True,
         "manual_url": "https://www.polestar.com/uk/manual/polestar-5/2026/software-updates/",
     },
 ]
 
-# Public, unauthenticated Polestar release-notes JSON API (backs the manual pages).
-API_BASE = "https://support-car-content.polestar.volvo.care"
+# Public, unauthenticated Volvo/Polestar release-notes API. The reference P4
+# implementation uses this hostname. Keep it as the single verified host until
+# an alternative has been proven to serve the same API; do not guess hostnames.
+API_BASES = ("https://support-car-content.polestar.volvo.care",)
+API_BASE = API_BASES[0]
 
 # Lists every model and the software versions Polestar has *registered* (incl. builds
 # not yet published as release notes). Used to derive the "in the pipeline" list.
@@ -222,14 +228,288 @@ def parse_versions(rn: dict) -> list:
 
 
 def fetch_api_json(path_or_url: str) -> dict:
-    """GET JSON from the API. Accepts an absolute URL or an API path (with or
-    without a leading slash); follows redirects (the content host 303-redirects to
-    an internal mirror)."""
+    """GET JSON from the verified Polestar car-content API host."""
     if path_or_url.startswith("http"):
-        url = path_or_url
-    else:
-        url = API_BASE + "/" + path_or_url.lstrip("/")
-    return json.loads(fetch(url))
+        return json.loads(fetch(path_or_url))
+    path = "/" + path_or_url.lstrip("/")
+    errors = []
+    for base in API_BASES:
+        try:
+            return json.loads(fetch(base + path))
+        except Exception as exc:
+            errors.append(f"{base}: {exc}")
+    raise RuntimeError("Polestar API request failed: " + " | ".join(errors))
+
+
+def positive_gates(expr) -> list:
+    """Return positive market/config atoms; negated-only gates are broad."""
+    if expr is None or expr == "true":
+        return []
+    atoms = re.sub(r"[()]", " ", str(expr)).replace("|", "&").split("&")
+    return [atom.strip() for atom in atoms
+            if atom.strip() and not atom.strip().startswith("!")]
+
+
+def _flatten_api_notes(node, out: list, inherited=None) -> None:
+    """Flatten rich text into note lines, inheriting market/config validity gates."""
+    inherited = inherited or {"validities": None, "features": None}
+    if isinstance(node, list):
+        for child in node:
+            _flatten_api_notes(child, out, inherited)
+        return
+    if isinstance(node, str):
+        # Preserve inline whitespace until the enclosing paragraph joins its children.
+        if node:
+            out.append({"text": node, **inherited})
+        return
+    if not isinstance(node, dict) or node.get("type") in {"title", "footnote"}:
+        return
+    gates = {
+        "validities": node.get("validities", inherited["validities"]),
+        "features": node.get("features", inherited["features"]),
+    }
+    children = node.get("children") or []
+    if node.get("type") in {"paragraph", "listItem", "listIntro"}:
+        own, nested = [], []
+        for child in children if isinstance(children, list) else [children]:
+            if isinstance(child, dict) and child.get("type") in {"unorderedList", "orderedList", "note"}:
+                nested.append(child)
+            else:
+                pieces = []
+                _flatten_api_notes(child, pieces, gates)
+                own.extend(pieces)
+        text = re.sub(r"\s+", " ", "".join(p["text"] for p in own)).strip()
+        if text:
+            out.append({"text": text, **gates})
+        for child in nested:
+            _flatten_api_notes(child, out, gates)
+        return
+    _flatten_api_notes(children, out, gates)
+
+
+def parse_api_release_notes(document: dict) -> list:
+    """Parse all version segments and retain market/config-specific note flags."""
+    body = document.get("releaseNotesDocument", {}).get("body", [])
+    updates, current = [], None
+    for segment in body:
+        if not isinstance(segment, dict):
+            continue
+        children = segment.get("children") or []
+        title_node = next((n for n in children if isinstance(n, dict) and n.get("type") == "title"), None)
+        title_children = title_node.get("children", []) if title_node else []
+        title = "".join(x for x in title_children if isinstance(x, str))
+        match = re.search(r"Software Version\s+(.+?)\s*:?\s*$", title, re.I)
+        if match:
+            version = match.group(1).strip()
+            current = next((u for u in updates if u["version"] == version), None)
+            if current is None:
+                current = {"version": version, "notes": [], "_gates": {}, "cms_version": None}
+                updates.append(current)
+        if current is None:
+            continue
+        inherited = {"validities": segment.get("validities"), "features": segment.get("features")}
+        lines = []
+        _flatten_api_notes(children, lines, inherited)
+        for line in lines:
+            note = line["text"]
+            if note not in current["notes"]:
+                current["notes"].append(note)
+            current["_gates"].setdefault(note, []).append(line)
+        cms = segment.get("cmsSoftwareVersion")
+        if cms is not None:
+            try:
+                current["cms_version"] = max(int(cms), int(current["cms_version"] or 0))
+            except (TypeError, ValueError):
+                pass
+
+    for update in updates:
+        specific = []
+        for note in update["notes"]:
+            occurrences = update["_gates"].get(note, [])
+            if occurrences and all(
+                positive_gates(o.get("validities")) or positive_gates(o.get("features"))
+                for o in occurrences
+            ):
+                specific.append(note)
+        del update["_gates"]
+        if specific:
+            update["market_specific"] = specific
+        if update.get("cms_version") is not None:
+            update["internal_version"] = update["cms_version"]
+    return updates
+
+
+def discover_api_model_code(model_label: str) -> str:
+    """Discover a model code from the public models feed when no code is configured."""
+    doc = fetch_api_json(AVAILABLE_MODELS_PATH)
+    models = doc if isinstance(doc, list) else doc.get("models") or doc.get("carModels") or []
+    match = next(
+        (item for item in models
+         if model_label.lower() in str(item.get("name") or item.get("modelName") or "").lower()
+         and item.get("modelCode") is not None),
+        None,
+    )
+    if not match:
+        raise RuntimeError(
+            f"available-car-models did not expose a model code for {model_label}"
+        )
+    return str(match["modelCode"])
+
+
+def fetch_api_versions(model_code: str) -> tuple[list, int | None]:
+    """Fetch cumulative release notes and manifest's latest published build."""
+    manifest = fetch_api_json(
+        f"/api/car-content/SOFTWARE_RELEASE_NOTES/{model_code}/UNTIL/99.0.0"
+    )
+    entries = manifest.get("content") or []
+    if not entries:
+        raise RuntimeError(f"API manifest for model {model_code} has no content entries")
+    entry = next(
+        (item for item in entries
+         if (item.get("language") or item.get("locale") or "").lower() in ("en-gb", "en_gb", "en")),
+        entries[0],
+    )
+    relative_url = entry.get("relativeUrl")
+    if not relative_url:
+        raise RuntimeError(f"API manifest for model {model_code} has no relativeUrl")
+    versions = parse_api_release_notes(fetch_api_json(relative_url))
+    space = manifest.get("spaceSoftwareVersion")
+    try:
+        space = int(space) if space is not None else None
+    except (TypeError, ValueError):
+        space = None
+    return versions, space
+
+
+def _manual_probe_builds(published_max: int, weeks_ahead: int = 12) -> list[int]:
+    """Candidate YYWW0-YYWW2 build IDs from published week through 12 weeks ahead."""
+    now = datetime.date.today()
+    iso = now.isocalendar()
+    end_year, end_week = iso.year % 100, iso.week + weeks_ahead
+    if end_week > 52:
+        end_year += 1
+        end_week -= 52
+    yy, ww = published_max // 1000, (published_max // 10) % 100
+    candidates = [published_max]
+    for _ in range(80):
+        if (yy, ww) > (end_year, end_week):
+            break
+        for suffix in range(3):
+            value = yy * 1000 + ww * 10 + suffix
+            if value > published_max:
+                candidates.append(value)
+        ww += 1
+        if ww > 53:
+            yy, ww = yy + 1, 1
+    return candidates
+
+
+def _probe_manual_build(base: str, model_code: str, build: int) -> bool:
+    url = f"{base}/api/car-content/USER_MANUAL/{model_code}/AT/{build}"
+    req = urllib.request.Request(url, headers={"User-Agent": UA}, method="HEAD")
+    try:
+        with urllib.request.urlopen(req, timeout=20) as response:
+            return 200 <= response.status < 300
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            return False
+        raise
+
+
+def _manual_builds_to_models(manuals: list, model_code: str) -> list:
+    by_build = {}
+    for manual in manuals:
+        try:
+            internal = int(manual.get("spaceSoftwareVersion"))
+        except (TypeError, ValueError):
+            continue
+        car = manual.get("carSoftwareVersion")
+        label = str(car).strip() if car is not None and str(car) != str(internal) else None
+        by_build[internal] = {
+            "internalVersion": internal,
+            **({"carVersion": label} if label else {}),
+        }
+    return [{"modelCode": str(model_code), "softwareVersions": sorted(
+        by_build.values(), key=lambda item: item["internalVersion"]
+    )}]
+
+
+def fetch_api_pipeline(model_code: str, published_max: int | None) -> list:
+    """Use the public models feed, then USER_MANUAL build probing if it is empty."""
+    if published_max is None:
+        return []
+    try:
+        doc = fetch_api_json(AVAILABLE_MODELS_PATH)
+        models = doc if isinstance(doc, list) else doc.get("models") or doc.get("carModels") or []
+        model = next((m for m in models if str(m.get("modelCode")) == str(model_code)), None)
+        versions = model.get("softwareVersions", []) if model else []
+        if versions:
+            return [
+                {"internal_version": int(v["internalVersion"]),
+                 "version": v.get("carVersion")}
+                for v in sorted(versions, key=lambda x: int(x.get("internalVersion", 0)))
+                if int(v.get("internalVersion", 0)) > published_max
+            ]
+    except Exception as exc:
+        print(f"Available-models feed unavailable for {model_code}: {exc}", file=sys.stderr)
+
+    try:
+        base = API_BASES[0]
+        candidates = _manual_probe_builds(published_max)
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            hits = [b for b, exists in zip(
+                candidates, pool.map(lambda b: _probe_manual_build(base, model_code, b), candidates)
+            ) if exists]
+        manuals = [fetch_api_json(f"/api/car-content/USER_MANUAL/{model_code}/AT/{b}")
+                   for b in [*hits, "99.0.0"]]
+        models = _manual_builds_to_models(manuals, model_code)
+        model = models[0]
+        return [
+            {"internal_version": int(v["internalVersion"]),
+             "version": v.get("carVersion")}
+            for v in model["softwareVersions"]
+            if int(v["internalVersion"]) > published_max
+        ]
+    except Exception as exc:
+        print(f"USER_MANUAL build probe unavailable for {model_code}: {exc}", file=sys.stderr)
+        return []
+
+
+def attach_api_build_numbers(versions: list, model_code: str, published_max: int | None) -> list:
+    """Attach registered YYWW build numbers to release versions by normalized label."""
+    if published_max is None:
+        return versions
+    pipeline = fetch_api_pipeline(model_code, published_max)
+    # Pipeline contains only unpublished builds; query the published max separately
+    # through USER_MANUAL so its label/build pair can be matched to release notes.
+    try:
+        latest = fetch_api_json(f"/api/car-content/USER_MANUAL/{model_code}/AT/99.0.0")
+        models = _manual_builds_to_models([latest], model_code)
+        records = models[0]["softwareVersions"]
+    except Exception:
+        records = []
+    by_key = {
+        ".".join(re.findall(r"\d+", str(v.get("carVersion", "")))): v["internalVersion"]
+        for v in records if v.get("carVersion")
+    }
+    return [
+        {**v, **({"internal_version": by_key[".".join(re.findall(r"\d+", v["version"]))]}
+                 if ".".join(re.findall(r"\d+", v["version"])) in by_key else {})}
+        for v in versions
+    ]
+
+
+def validate_model_versions(versions: list, cached: list | None = None) -> None:
+    """Reject empty or suspiciously truncated source responses before accepting them."""
+    if not versions:
+        raise RuntimeError("source returned zero software versions")
+    empty = next((v for v in versions if not v.get("notes")), None)
+    if empty:
+        raise RuntimeError(f"version {empty.get('version')} has no parsed notes")
+    if cached and len(versions) < max(1, len(cached) // 2):
+        raise RuntimeError(
+            f"source version count collapsed from {len(cached)} to {len(versions)}"
+        )
 
 
 def _seg_version(seg: dict) -> str | None:
@@ -431,14 +711,48 @@ def scrape_model(model: dict, local: str | None):
     release date, and populate meta with `space_software_version` and the `upcoming`
     pipeline (builds registered but not yet published)."""
     meta: dict = {}
+    cached_path = DATA_DIR / f"{model['slug']}.json"
+    cached = []
+    if cached_path.exists():
+        try:
+            cached = json.loads(cached_path.read_text(encoding="utf-8"))
+        except Exception:
+            cached = []
+
+    api_error = None
     if model.get("source") == "api":
-        versions, space = fetch_api_versions(model["model_code"])
-        meta["space_software_version"] = space
-        meta["upcoming"] = fetch_api_pipeline(model["model_code"], space)
+        try:
+            model_code = model.get("model_code")
+            if not model_code and model.get("discover_model_code"):
+                model_code = discover_api_model_code(model["label"])
+            if not model_code:
+                raise RuntimeError(f"no verified API model code configured for {model['label']}")
+            versions, space = fetch_api_versions(model_code)
+            validate_model_versions(versions, cached)
+            meta["source_used"] = "api"
+            meta["api_model_code"] = model_code
+            meta["space_software_version"] = space
+            versions = attach_api_build_numbers(versions, model_code, space)
+            meta["upcoming"] = fetch_api_pipeline(model_code, space)
+        except Exception as exc:
+            api_error = exc
+            print(f"  API source failed for {model['slug']}: {exc}", file=sys.stderr)
+            versions = None
+        # The manual is a last-resort live source, never the first choice for API models.
+        if versions is None:
+            page = pathlib.Path(local).read_text(encoding="utf-8", errors="replace") if local else fetch(model["manual_url"])
+            rn = extract_release_notes_object(page)
+            versions = parse_versions(rn)
+            validate_model_versions(versions, cached)
+            meta["source_used"] = "manual_fallback"
+            meta["api_error"] = str(api_error)
+            meta["upcoming"] = []
     else:
         page = pathlib.Path(local).read_text(encoding="utf-8", errors="replace") if local else fetch(model["manual_url"])
         rn = extract_release_notes_object(page)
         versions = parse_versions(rn)
+        validate_model_versions(versions, cached)
+        meta["source_used"] = "manual"
     if not versions:
         raise SystemExit(f"parsed zero versions for {model['slug']} — aborting so we don't wipe good data")
 
@@ -465,6 +779,17 @@ def main():
     all_meta = {}  # slug -> meta (space_software_version, upcoming), for META object
 
     failed_models = []
+    successful_models = 0
+
+    # Report DNS status up front. This is diagnostic only: HTML-sourced models
+    # can still be refreshed when the API host is unavailable.
+    for base in API_BASES:
+        host = urlparse(base).hostname
+        try:
+            socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM)
+            print(f"API DNS OK: {host}")
+        except OSError as exc:
+            print(f"::warning title=Polestar API DNS::{host} did not resolve: {exc}")
 
     for model in MODELS:
         slug = model["slug"]
@@ -482,20 +807,27 @@ def main():
                     raise ValueError("cached version data is empty or invalid")
                 meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
             except Exception as cache_error:
-                failed_models.append(slug)
-                print(f"ERROR no usable cached data for {slug}: {cache_error}", file=sys.stderr)
-                continue
+                # Keep the model key in the generated page even on its first
+                # bootstrap failure; a later successful scrape fills it in.
+                versions, meta = [], {}
+                print(
+                    f"WARNING no cached data for {slug}: {cache_error}",
+                    file=sys.stderr,
+                )
+            else:
+                latest = f", latest {versions[0]['version']}" if versions else ""
+                print(
+                    f"  {slug}: using {len(versions)} cached versions{latest}; "
+                    "this run is incomplete",
+                    file=sys.stderr,
+                )
 
             all_data[slug] = versions
             all_meta[slug] = meta
-            print(
-                f"  {slug}: using {len(versions)} cached versions "
-                f"(latest {versions[0]['version']}); this run is incomplete",
-                file=sys.stderr,
-            )
             failed_models.append(slug)
             continue
 
+        successful_models += 1
         data_path.write_text(
             json.dumps(versions, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         (ROOT / f"feed-{slug}.xml").write_text(build_feed(model, versions), encoding="utf-8")
@@ -529,12 +861,14 @@ def main():
         INDEX.write_text(new_index, encoding="utf-8")
     print(f"index.html: {'updated' if changed else 'no change'}")
 
-    # Do not let the workflow commit a mixed snapshot. Successful models may have
-    # been scraped, but any failure keeps the workflow red so no partial data ships.
+    # Publish successful model updates even when another source is temporarily
+    # unavailable. Failed models retain their last-known-good cache (or an empty
+    # bootstrap list); surface a warning instead of discarding successful work.
     if failed_models:
-        raise SystemExit(
-            "Scrape incomplete; preserved cached data for: " + ", ".join(failed_models)
-        )
+        message = "Scrape incomplete; preserved cached data for: " + ", ".join(failed_models)
+        print(f"::warning title=Partial Polestar scrape::{message}")
+        if successful_models == 0:
+            raise SystemExit(message)
 
 
 if __name__ == "__main__":

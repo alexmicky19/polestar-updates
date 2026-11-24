@@ -24,13 +24,13 @@ class TrackerConfigurationTests(unittest.TestCase):
 
     def test_all_four_models_are_configured(self):
         expected = {
-            "polestar-2": None,
-            "polestar-3": "359",
-            "polestar-4": "814",
-            "polestar-5": "824",
+            "polestar-2": ("html", None),
+            "polestar-3": ("api", "359"),
+            "polestar-4": ("api", "814"),
+            "polestar-5": ("api", None),
         }
         actual = {
-            model["slug"]: model.get("model_code")
+            model["slug"]: (model["source"], model.get("model_code"))
             for model in self.models
         }
         self.assertEqual(actual, expected)
@@ -40,7 +40,26 @@ class TrackerConfigurationTests(unittest.TestCase):
             self.assertIn(model["source"], {"html", "api"})
             self.assertIn(model["slug"], model["manual_url"])
             if model["source"] == "api":
-                self.assertTrue(model.get("model_code"))
+                self.assertTrue(model.get("model_code") or model.get("discover_model_code"))
+
+    def test_api_uses_verified_host_only(self):
+        self.assertIn('"https://support-car-content.polestar.volvo.care"', self.scraper)
+        self.assertNotIn('"https://support-car-content.volvo.care"', self.scraper)
+        self.assertIn("for base in API_BASES:", self.scraper)
+
+    def test_polestar_4_api_is_primary_and_manual_is_fallback(self):
+        self.assertIn('"model_code": "814"', self.scraper)
+        self.assertIn('meta["source_used"] = "api"', self.scraper)
+        self.assertIn('meta["source_used"] = "manual_fallback"', self.scraper)
+        self.assertIn("parse_api_release_notes", self.scraper)
+        self.assertIn("market_specific", self.scraper)
+        self.assertIn("discover_api_model_code", self.scraper)
+        self.assertIn('"discover_model_code": True', self.scraper)
+
+    def test_partial_scrapes_preserve_data_without_discarding_successes(self):
+        self.assertIn("successful_models += 1", self.scraper)
+        self.assertIn("::warning title=Partial Polestar scrape::", self.scraper)
+        self.assertIn("if successful_models == 0:", self.scraper)
 
     def test_generated_page_contains_every_model(self):
         data_match = re.search(r"^const DATA = (.*);$", self.index, re.MULTILINE)
