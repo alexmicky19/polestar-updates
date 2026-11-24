@@ -27,7 +27,7 @@ class TrackerConfigurationTests(unittest.TestCase):
             "polestar-2": ("html", None),
             "polestar-3": ("api", "359"),
             "polestar-4": ("api", "814"),
-            "polestar-5": ("html", None),
+            "polestar-5": ("api", None),
         }
         actual = {
             model["slug"]: (model["source"], model.get("model_code"))
@@ -40,7 +40,7 @@ class TrackerConfigurationTests(unittest.TestCase):
             self.assertIn(model["source"], {"html", "api"})
             self.assertIn(model["slug"], model["manual_url"])
             if model["source"] == "api":
-                self.assertTrue(model.get("model_code"))
+                self.assertTrue(model.get("model_code") or model.get("discover_model_code"))
 
     def test_api_uses_current_host_with_legacy_fallback(self):
         self.assertIn('"https://support-car-content.polestar.volvo.care"', self.scraper)
@@ -53,6 +53,8 @@ class TrackerConfigurationTests(unittest.TestCase):
         self.assertIn('meta["source_used"] = "manual_fallback"', self.scraper)
         self.assertIn("parse_api_release_notes", self.scraper)
         self.assertIn("market_specific", self.scraper)
+        self.assertIn("discover_api_model_code", self.scraper)
+        self.assertIn('"discover_model_code": True', self.scraper)
 
     def test_partial_scrapes_preserve_data_without_discarding_successes(self):
         self.assertIn("successful_models += 1", self.scraper)
